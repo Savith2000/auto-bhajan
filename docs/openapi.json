@@ -1,0 +1,1117 @@
+{
+ "openapi": "3.0.3",
+ "info": {
+  "title": "Sai Tunes External API",
+  "version": "1.0.0",
+  "description": "Read-only access to the Sai Tunes bhajan catalog for third-party applications.\n\n## Authentication\n\nEvery data endpoint requires an OAuth2 **client credentials** access token from AWS Cognito.\nRequest credentials from the Sai Tunes team; you will receive a client id and client secret.\n\n```bash\ncurl -X POST https://.auth.us-east-1.amazoncognito.com/oauth2/token \\\n  -u \"$CLIENT_ID:$CLIENT_SECRET\" \\\n  -H 'Content-Type: application/x-www-form-urlencoded' \\\n  -d grant_type=client_credentials \\\n  -d scope=https://api.saitunes.com/read\n```\n\nThen send the token on each request:\n\n```bash\ncurl -H \"Authorization: Bearer $ACCESS_TOKEN\" \\\n  'https://api.saitunes.com/v1/bhajans?q=sai+ram'\n```\n\nTokens are valid for 60 minutes \u2014 cache and reuse them rather than minting one per request.\n\n**Keep your client secret on a server you control.** It must not be embedded in a\nshipped mobile or browser application, where it can be extracted from the bundle.\nMobile apps should call your own backend, which holds the secret and talks to this API.\n\n## Scope\n\nThis API is read-only. All writes continue to happen through the Sai Tunes web\napplication. Only published content is returned; editorial drafts, user data and\ncenter-private recordings are never exposed."
+ },
+ "servers": [
+  {
+   "url": "http://localhost:3609"
+  }
+ ],
+ "tags": [
+  {
+   "name": "Bhajans",
+   "description": "Search and retrieve individual bhajans."
+  },
+  {
+   "name": "Catalog",
+   "description": "Facets, curated collections and singer albums."
+  },
+  {
+   "name": "Meta",
+   "description": "Health and documentation endpoints."
+  }
+ ],
+ "components": {
+  "securitySchemes": {
+   "cognitoClientCredentials": {
+    "type": "oauth2",
+    "description": "OAuth2 client credentials against AWS Cognito. Request a token from the token URL below using HTTP Basic auth with your client id and secret, then send it as `Authorization: Bearer <access_token>`.",
+    "flows": {
+     "clientCredentials": {
+      "tokenUrl": "https://.auth.us-east-1.amazoncognito.com/oauth2/token",
+      "scopes": {
+       "https://api.saitunes.com/read": "Read-only access to the public bhajan catalog"
+      }
+     }
+    }
+   }
+  },
+  "schemas": {
+   "Health": {
+    "type": "object",
+    "properties": {
+     "success": {
+      "type": "boolean"
+     },
+     "status": {
+      "type": "string",
+      "example": "UP"
+     }
+    },
+    "required": [
+     "success",
+     "status"
+    ]
+   },
+   "BhajanSummary": {
+    "type": "object",
+    "properties": {
+     "slug": {
+      "type": "string",
+      "example": "sai-ram-sai-ram"
+     },
+     "title": {
+      "type": "string",
+      "example": "Sai Ram Sai Ram"
+     },
+     "deity": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Multi-valued: a bhajan may address several deities.",
+      "example": [
+       "Rama"
+      ]
+     },
+     "language": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Multi-valued: lyrics are often a mix of languages.",
+      "example": [
+       "Sanskrit",
+       "Hindi"
+      ]
+     },
+     "raga": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "Multi-valued.",
+      "example": [
+       "Desh"
+      ]
+     },
+     "beat": {
+      "type": "string",
+      "nullable": true,
+      "example": "8 Beat - Keherwa - Adi"
+     },
+     "level": {
+      "type": "string",
+      "nullable": true,
+      "example": "Easy"
+     },
+     "tempo": {
+      "type": "string",
+      "nullable": true,
+      "example": "Slow"
+     },
+     "gentsPitch": {
+      "type": "string",
+      "nullable": true,
+      "description": "Suggested pitch for male voices.",
+      "example": "C"
+     },
+     "ladiesPitch": {
+      "type": "string",
+      "nullable": true,
+      "description": "Suggested pitch for female voices.",
+      "example": "F"
+     },
+     "popularity": {
+      "type": "number",
+      "nullable": true,
+      "description": "Relative popularity score."
+     },
+     "recordingCount": {
+      "type": "number",
+      "description": "Number of published audio recordings."
+     }
+    },
+    "required": [
+     "slug",
+     "title",
+     "deity",
+     "language",
+     "raga",
+     "beat",
+     "level",
+     "tempo",
+     "gentsPitch",
+     "ladiesPitch",
+     "popularity",
+     "recordingCount"
+    ]
+   },
+   "PagedBhajanSummary": {
+    "type": "object",
+    "properties": {
+     "total": {
+      "type": "number",
+      "description": "Total matching bhajans across all pages."
+     },
+     "page": {
+      "type": "number"
+     },
+     "size": {
+      "type": "number"
+     },
+     "totalPages": {
+      "type": "number"
+     },
+     "results": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/BhajanSummary"
+      }
+     }
+    },
+    "required": [
+     "total",
+     "page",
+     "size",
+     "totalPages",
+     "results"
+    ]
+   },
+   "ValidationError": {
+    "type": "object",
+    "properties": {
+     "error": {
+      "type": "string",
+      "enum": [
+       "invalid_request"
+      ]
+     },
+     "message": {
+      "type": "string"
+     },
+     "details": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "path": {
+         "type": "string",
+         "example": "size"
+        },
+        "message": {
+         "type": "string",
+         "example": "Number must be less than or equal to 100"
+        }
+       },
+       "required": [
+        "path",
+        "message"
+       ]
+      }
+     }
+    },
+    "required": [
+     "error",
+     "message",
+     "details"
+    ]
+   },
+   "Error": {
+    "type": "object",
+    "properties": {
+     "error": {
+      "type": "string",
+      "description": "Stable machine-readable code.",
+      "example": "invalid_token"
+     },
+     "message": {
+      "type": "string",
+      "description": "Human-readable explanation."
+     }
+    },
+    "required": [
+     "error",
+     "message"
+    ]
+   },
+   "Suggestion": {
+    "type": "object",
+    "properties": {
+     "slug": {
+      "type": "string"
+     },
+     "title": {
+      "type": "string"
+     },
+     "deity": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "gentsPitch": {
+      "type": "string",
+      "nullable": true
+     },
+     "ladiesPitch": {
+      "type": "string",
+      "nullable": true
+     }
+    },
+    "required": [
+     "slug",
+     "title",
+     "deity",
+     "gentsPitch",
+     "ladiesPitch"
+    ]
+   },
+   "BhajanTranslation": {
+    "type": "object",
+    "properties": {
+     "language": {
+      "type": "string",
+      "example": "Devnaagri"
+     },
+     "lyrics": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "language",
+     "lyrics"
+    ]
+   },
+   "BhajanRecording": {
+    "type": "object",
+    "properties": {
+     "singer": {
+      "type": "string",
+      "nullable": true
+     },
+     "scale": {
+      "type": "string",
+      "nullable": true,
+      "description": "Musical scale the recording is sung in.",
+      "example": "C"
+     },
+     "quality": {
+      "type": "string",
+      "nullable": true,
+      "example": "professional"
+     },
+     "duration": {
+      "type": "number",
+      "nullable": true,
+      "description": "Length in seconds."
+     },
+     "dateRecorded": {
+      "type": "string",
+      "nullable": true
+     },
+     "audioUrl": {
+      "type": "string",
+      "description": "Directly playable audio URL."
+     }
+    },
+    "required": [
+     "singer",
+     "scale",
+     "quality",
+     "duration",
+     "dateRecorded",
+     "audioUrl"
+    ]
+   },
+   "BhajanVideo": {
+    "type": "object",
+    "properties": {
+     "url": {
+      "type": "string"
+     },
+     "title": {
+      "type": "string",
+      "nullable": true
+     },
+     "author": {
+      "type": "string",
+      "nullable": true,
+      "description": "Publishing channel or artist."
+     }
+    },
+    "required": [
+     "url",
+     "title",
+     "author"
+    ]
+   },
+   "BhajanDetail": {
+    "allOf": [
+     {
+      "$ref": "#/components/schemas/BhajanSummary"
+     },
+     {
+      "type": "object",
+      "properties": {
+       "lyrics": {
+        "type": "string",
+        "nullable": true
+       },
+       "composer": {
+        "type": "string",
+        "nullable": true
+       },
+       "lyricsSource": {
+        "type": "string",
+        "nullable": true
+       },
+       "englishMeaning": {
+        "type": "string",
+        "nullable": true,
+        "description": "Present only once an editor-approved translation exists."
+       },
+       "translations": {
+        "type": "array",
+        "items": {
+         "$ref": "#/components/schemas/BhajanTranslation"
+        },
+        "description": "Approved transliterations into other scripts."
+       },
+       "recordings": {
+        "type": "array",
+        "items": {
+         "$ref": "#/components/schemas/BhajanRecording"
+        },
+        "description": "Published audio recordings. Center-private recordings are never included."
+       },
+       "videos": {
+        "type": "array",
+        "items": {
+         "$ref": "#/components/schemas/BhajanVideo"
+        },
+        "description": "Curated video links."
+       }
+      },
+      "required": [
+       "lyrics",
+       "composer",
+       "lyricsSource",
+       "englishMeaning",
+       "translations",
+       "recordings",
+       "videos"
+      ]
+     }
+    ]
+   },
+   "FacetBucket": {
+    "type": "object",
+    "properties": {
+     "value": {
+      "type": "string",
+      "example": "Sai"
+     },
+     "count": {
+      "type": "number",
+      "example": 128
+     }
+    },
+    "required": [
+     "value",
+     "count"
+    ]
+   },
+   "Aggregations": {
+    "type": "object",
+    "properties": {
+     "deity": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/FacetBucket"
+      }
+     },
+     "tempo": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/FacetBucket"
+      }
+     },
+     "level": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/FacetBucket"
+      }
+     },
+     "raga": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/FacetBucket"
+      }
+     },
+     "language": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/FacetBucket"
+      }
+     }
+    },
+    "required": [
+     "deity",
+     "tempo",
+     "level",
+     "raga",
+     "language"
+    ]
+   },
+   "HomepageRow": {
+    "type": "object",
+    "properties": {
+     "value": {
+      "type": "string",
+      "description": "The deity, tempo or level this row groups by.",
+      "example": "Sai"
+     },
+     "count": {
+      "type": "number",
+      "description": "Total bhajans in this group."
+     },
+     "bhajans": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/BhajanSummary"
+      },
+      "description": "Top bhajans in the group."
+     }
+    },
+    "required": [
+     "value",
+     "count",
+     "bhajans"
+    ]
+   },
+   "Homepage": {
+    "type": "object",
+    "properties": {
+     "byDeity": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/HomepageRow"
+      }
+     },
+     "byTempo": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/HomepageRow"
+      }
+     },
+     "byLevel": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/HomepageRow"
+      }
+     }
+    },
+    "required": [
+     "byDeity",
+     "byTempo",
+     "byLevel"
+    ]
+   }
+  },
+  "parameters": {}
+ },
+ "paths": {
+  "/v1/health": {
+   "get": {
+    "operationId": "getHealth",
+    "tags": [
+     "Meta"
+    ],
+    "summary": "Liveness probe",
+    "description": "Public \u2014 requires no token. Use it to confirm connectivity before authenticating.",
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "Service is up.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Health"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/bhajans": {
+   "get": {
+    "operationId": "searchBhajans",
+    "tags": [
+     "Bhajans"
+    ],
+    "summary": "Search the bhajan catalog",
+    "description": "Full-text search across titles and lyrics with optional facet filters. Only published (approved) bhajans are returned.",
+    "security": [
+     {
+      "cognitoClientCredentials": [
+       "https://api.saitunes.com/read"
+      ]
+     }
+    ],
+    "parameters": [
+     {
+      "schema": {
+       "type": "string",
+       "maxLength": 200,
+       "description": "Free-text search across title and lyrics. Omit to browse everything.",
+       "example": "sai ram"
+      },
+      "required": false,
+      "name": "q",
+      "in": "query"
+     },
+     {
+      "schema": {
+       "type": "string",
+       "maxLength": 100,
+       "example": "Sai"
+      },
+      "required": false,
+      "name": "deity",
+      "in": "query"
+     },
+     {
+      "schema": {
+       "type": "string",
+       "maxLength": 100,
+       "example": "Bhairavi"
+      },
+      "required": false,
+      "name": "raga",
+      "in": "query"
+     },
+     {
+      "schema": {
+       "type": "string",
+       "maxLength": 100,
+       "example": "Sanskrit"
+      },
+      "required": false,
+      "name": "language",
+      "in": "query"
+     },
+     {
+      "schema": {
+       "type": "string",
+       "maxLength": 100,
+       "example": "Slow"
+      },
+      "required": false,
+      "name": "tempo",
+      "in": "query"
+     },
+     {
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 10000,
+       "default": 1,
+       "description": "1-based page number.",
+       "example": 1
+      },
+      "required": false,
+      "name": "page",
+      "in": "query"
+     },
+     {
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 100,
+       "default": 10,
+       "description": "Results per page (max 100).",
+       "example": 10
+      },
+      "required": false,
+      "name": "size",
+      "in": "query"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "A page of matching bhajans.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PagedBhajanSummary"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Invalid query or path parameters.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ValidationError"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Missing, malformed, or invalid access token.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Token lacks the https://api.saitunes.com/read scope.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limit exceeded.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/bhajans/suggest": {
+   "get": {
+    "operationId": "suggestBhajans",
+    "tags": [
+     "Bhajans"
+    ],
+    "summary": "Autocomplete bhajan titles",
+    "description": "Lightweight type-ahead suggestions for a partial title.",
+    "security": [
+     {
+      "cognitoClientCredentials": [
+       "https://api.saitunes.com/read"
+      ]
+     }
+    ],
+    "parameters": [
+     {
+      "schema": {
+       "type": "string",
+       "minLength": 2,
+       "maxLength": 100,
+       "description": "Partial title, minimum 2 characters.",
+       "example": "sai ra"
+      },
+      "required": true,
+      "name": "q",
+      "in": "query"
+     },
+     {
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 20,
+       "default": 5,
+       "description": "Maximum suggestions to return."
+      },
+      "required": false,
+      "name": "limit",
+      "in": "query"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Matching suggestions, most relevant first.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/Suggestion"
+         }
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Invalid query or path parameters.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ValidationError"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Missing, malformed, or invalid access token.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Token lacks the https://api.saitunes.com/read scope.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limit exceeded.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/bhajans/{slug}": {
+   "get": {
+    "operationId": "getBhajan",
+    "tags": [
+     "Bhajans"
+    ],
+    "summary": "Fetch one bhajan",
+    "description": "Returns the full bhajan including lyrics, approved transliterations, published recordings and curated videos. Passing a legacy slug returns the bhajan with its current canonical `slug` in the body \u2014 follow that value rather than expecting a redirect.",
+    "security": [
+     {
+      "cognitoClientCredentials": [
+       "https://api.saitunes.com/read"
+      ]
+     }
+    ],
+    "parameters": [
+     {
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 200,
+       "description": "Bhajan slug. A legacy slug resolves to its current one.",
+       "example": "sai-ram-sai-ram"
+      },
+      "required": true,
+      "name": "slug",
+      "in": "path"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "The bhajan.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BhajanDetail"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Invalid query or path parameters.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ValidationError"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Missing, malformed, or invalid access token.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Token lacks the https://api.saitunes.com/read scope.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "No published bhajan with that slug.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limit exceeded.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/aggregations": {
+   "get": {
+    "operationId": "getAggregations",
+    "tags": [
+     "Catalog"
+    ],
+    "summary": "Facet values and counts",
+    "description": "All available deity, tempo, level, raga and language values with document counts. Use these to populate filter UIs.",
+    "security": [
+     {
+      "cognitoClientCredentials": [
+       "https://api.saitunes.com/read"
+      ]
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Facet buckets.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Aggregations"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Missing, malformed, or invalid access token.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Token lacks the https://api.saitunes.com/read scope.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limit exceeded.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/homepage": {
+   "get": {
+    "operationId": "getHomepage",
+    "tags": [
+     "Catalog"
+    ],
+    "summary": "Curated homepage rows",
+    "description": "Top bhajans grouped by deity, tempo and level \u2014 the same data that drives the web homepage. This endpoint fans out to many queries and carries a tighter rate limit than the rest of the API.",
+    "security": [
+     {
+      "cognitoClientCredentials": [
+       "https://api.saitunes.com/read"
+      ]
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Curated rows.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Homepage"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Missing, malformed, or invalid access token.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Token lacks the https://api.saitunes.com/read scope.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limit exceeded.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/albums/singer/bhajans": {
+   "get": {
+    "operationId": "getBhajansBySinger",
+    "tags": [
+     "Catalog"
+    ],
+    "summary": "Bhajans recorded by a singer",
+    "description": "Find bhajans that have a published recording by any of the given singer name variations.",
+    "security": [
+     {
+      "cognitoClientCredentials": [
+       "https://api.saitunes.com/read"
+      ]
+     }
+    ],
+    "parameters": [
+     {
+      "schema": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 500,
+       "description": "Comma-separated singer name variations to match against recordings.",
+       "example": "Radio Sai,Radiosai Bhajans"
+      },
+      "required": true,
+      "name": "keywords",
+      "in": "query"
+     },
+     {
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 10000,
+       "default": 1,
+       "description": "1-based page number.",
+       "example": 1
+      },
+      "required": false,
+      "name": "page",
+      "in": "query"
+     },
+     {
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 100,
+       "default": 15,
+       "description": "Results per page (max 100)."
+      },
+      "required": false,
+      "name": "size",
+      "in": "query"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "A page of matching bhajans.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PagedBhajanSummary"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Invalid query or path parameters.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ValidationError"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Missing, malformed, or invalid access token.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "Token lacks the https://api.saitunes.com/read scope.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "Rate limit exceeded.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

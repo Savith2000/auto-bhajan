@@ -1,0 +1,20 @@
+.env
+.token_cache.json
+__pycache__/
+*.pyc
+.venv/
+data/raw/
+node_modules/
+dist/
+public/ort/
+eval/audio/
+public/__test/
+eval/recordings/
+data/cmudict.dict
+.impeccable/shots/
+.impeccable/refs/
+# Model transcripts cached by eval/transcribe.ts (hundreds of MB; regenerate with it)
+eval/transcripts/
+.impeccable/questions/
+# Editor scratch files
+Untitled-*

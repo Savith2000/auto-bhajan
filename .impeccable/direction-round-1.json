@@ -1,0 +1,52 @@
+{
+  "title": "Choose the visual world",
+  "question": "The roll assigned the Japamala direction. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Japamala",
+      "kicker": "THE ROLL",
+      "lineage": "The japamala of namasmarana: 108 beads and the guru bead, counted one by one",
+      "thesis": "The session is a mala: each bhajan is one bead, and its words arrive strung on a thread.",
+      "palette": ["#1E1210", "#EEF1F4", "#D2402A", "#8C9A6B", "#C99A62"],
+      "materials": ["rudraksha and tulsi beads", "red cotton thread", "sphatika crystal"],
+      "viewport": "One guru bead, centred on a dark rudraksha ground, is the Start button; when the bhajan is found its letters are strung in along a vermilion thread and the bead slides down the cord to rest below the lyrics.",
+      "risk": "Beads can drift into decoration; the bead must stay obviously a button, and projector legibility beats any thread effect."
+    },
+    {
+      "id": "challenger-cracktro",
+      "label": "Still line on a drifting void",
+      "lineage": "Demoscene cracktro title screens",
+      "thesis": "Lyrics as dead-still ivory lines on a black void while grey dust drifts behind; an amber caret is the listening state.",
+      "case": "Calm and readable on a projector, but demoscene is foreign to a Sai hall and it sits close to the karaoke-black rut.",
+      "hero": "https://impeccable.style/worlds/cards/operate-c-cracktro-scroller-queue-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/operate-c-cracktro-scroller-queue.webp"
+    },
+    {
+      "id": "challenger-steprow",
+      "label": "Step-row listener",
+      "lineage": "Early-80s drum machine step rows",
+      "thesis": "Listening is a lit step row chasing through the 3, 5, 7, 9 and 10-second checks before the words land.",
+      "case": "Makes the wait legible, but a rhythm-machine panel fights the devotional mood and adds nothing to the lyrics screen itself.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-drum-machine-step-row-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/signals-instruments-drum-machine-step-row.webp"
+    },
+    {
+      "id": "challenger-woodtype",
+      "label": "Wood-type broadside",
+      "lineage": "Hatch Show Print letterpress posters",
+      "thesis": "Every lyric line set as a full-width wood-type band, stamped onto the screen one press-pull per line.",
+      "case": "The strongest legibility from the back of a hall; a gig-poster voice is a stretch for devotional singing.",
+      "hero": "https://impeccable.style/worlds/cards/posters-covers-sleeves-hatch-show-print-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/posters-covers-sleeves-hatch-show-print.webp"
+    }
+  ],
+  "reroll": true,
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "A dark lyric screen: white centred text, a simple fade between bhajans, a plain round button.",
+    "viewport": "Black screen, centred white sans-serif lyrics filling the frame, a pill-shaped button below."
+  },
+  "steer": true
+}

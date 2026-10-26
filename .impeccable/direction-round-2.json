@@ -1,0 +1,52 @@
+{
+  "title": "Choose the visual world",
+  "question": "The re-roll assigned the Arati direction. Keep it, take an alternate, or re-roll again.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Arati",
+      "kicker": "THE ROLL",
+      "lineage": "The arati plate and its camphor flame, waved in clockwise circles at the close of every session",
+      "thesis": "Listening is the flame circling; when the bhajan is known, its light passes over the screen and the words appear where it has been.",
+      "palette": ["#0E1226", "#FFFFFF", "#B98A3E", "#9FC3FF", "#2A2F4A"],
+      "materials": ["polished brass plate", "camphor flame, blue at the base", "night-indigo sanctum"],
+      "viewport": "A small brass ring with a white camphor flame, centred on deep indigo, is the Start button; found lyrics are revealed line by line by one sweep of its light, then the flame settles below them.",
+      "risk": "Flame and brass slide easily into lamplight cliché and glow that washes out on a projector; the light must be crisp and brief, never ambient."
+    },
+    {
+      "id": "challenger-teletext",
+      "label": "Teletext bhajan pages",
+      "lineage": "Broadcast teletext magazines",
+      "thesis": "Every bhajan is a numbered teletext page: double-height title, block-mosaic header, lyrics in a strict character grid on black.",
+      "case": "Built for reading a TV across a room, so it suits the projector, but its retro-broadcast voice has no roots in a Sai hall.",
+      "hero": "https://impeccable.style/worlds/cards/broadcast-programming-teletext-service-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/broadcast-programming-teletext-service.webp"
+    },
+    {
+      "id": "challenger-leather",
+      "label": "Stitched bhajan book",
+      "lineage": "Skeuomorphic leather and linen interfaces",
+      "thesis": "The centre's bhajan binder as a loved object: a stitched leather cover opens and each bhajan is a linen page on a wooden shelf.",
+      "case": "Devotees know the binder well, but leather, linen and wood textures get noisy and murky on a projector.",
+      "hero": "https://impeccable.style/worlds/cards/digital-design-canon-skeuomorph-leather-studio-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/digital-design-canon-skeuomorph-leather-studio.webp"
+    },
+    {
+      "id": "challenger-glaze",
+      "label": "Glaze river",
+      "lineage": "Heavily glazed cups on a kiln shelf",
+      "thesis": "The lyrics run into place like molten glaze, pooling and stopping in deep colour fields that change with each bhajan.",
+      "case": "The motion is beautiful, but running colour fights fast legibility, and the potter's world is foreign to the audience.",
+      "hero": "https://impeccable.style/worlds/cards/clay-ceramics-fracture-glaze-river-shelf-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/clay-ceramics-fracture-glaze-river-shelf.webp"
+    }
+  ],
+  "reroll": true,
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "A dark lyric screen: white centred text, a simple fade between bhajans, a plain round button.",
+    "viewport": "Black screen, centred white sans-serif lyrics filling the frame, a pill-shaped button below."
+  },
+  "steer": true
+}
