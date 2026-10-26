@@ -91,7 +91,7 @@ are added. The API allows 60 requests a minute, so a full refresh takes about
 | | |
 |---|---|
 | `src/App.tsx` | the three states (start page, listening, slide) and the one listen button that moves between them |
-| `src/ui/Home.tsx` | the start page: what AutoBhajan does, the cycle, an example slide, privacy, session tips |
+| `src/ui/Home.tsx` | the start page: one statement, the button, an example slide, the shortcuts |
 | `src/ui/Lyrics.tsx` | the bhajan slide, fitted to the screen (also the start page's example) |
 | `src/listen/session.ts` | one listening attempt: wait for singing → checkpoints → stop |
 | `src/listen/onset.ts` | notices when something loud starts (singing or music), against the room's background noise |

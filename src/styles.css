@@ -478,20 +478,17 @@ kbd {
   color: var(--ink-2);
 }
 
-/* The first screen: what it does, the button, the cycle. */
+/* The first screen: the headline, one sentence, the button. A little short of
+   the full height, so the example below shows its heading at the foot. */
 .hero {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100svh - 64px);
-  padding: clamp(8px, 3vh, 32px) var(--margin) clamp(20px, 3vh, 32px);
+  min-height: calc(90svh - 64px);
+  padding: clamp(8px, 3vh, 32px) var(--margin) clamp(96px, 14vh, 140px);
   box-sizing: border-box;
   text-align: center;
-}
-
-.hero-copy {
-  margin-bottom: clamp(28px, 5.5vh, 60px);
 }
 
 .hero h1 {
@@ -505,103 +502,33 @@ kbd {
 }
 
 .hero-lede {
-  max-width: 34em;
+  max-width: 30em;
   margin: clamp(14px, 2.4vh, 22px) auto 0;
   font-size: clamp(18px, 1.55vw, 23px);
   line-height: 1.42;
   letter-spacing: -0.01em;
   color: var(--ink-2);
-  text-wrap: pretty;
+  text-wrap: balance;
   animation: rise 1.05s var(--arrive) 0.12s both;
 }
 
+/* The button's place; its caption hangs below, inside the hero's padding. */
 .hero-slot {
   flex: none;
   width: var(--button);
   height: var(--button);
+  margin-top: clamp(32px, 6vh, 64px);
 }
 
-/* Room for the caption, which hangs under the button. */
-.hero-caption-space {
-  flex: none;
-  height: 64px;
-}
-
-.cycle {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(20px, 4vw, 56px);
-  width: min(980px, 100%);
-  margin: clamp(28px, 5vh, 52px) 0 0;
-  padding: clamp(18px, 3vh, 28px) 0 0;
-  border-top: 2px solid var(--rule);
-  list-style: none;
-  text-align: left;
-  animation: fade-in 1s var(--arrive) 0.3s both;
-}
-
-.cycle-step {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--ink-3);
-  font-variant-numeric: tabular-nums;
-}
-
-.cycle h2 {
-  margin: 0;
-  font-size: 19px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  color: var(--ink);
-}
-
-.cycle p {
-  margin: 6px 0 0;
-  font-size: 15px;
-  line-height: 1.45;
-  color: var(--ink-2);
-}
-
-.more-cue {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: clamp(20px, 4vh, 40px);
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--ink-2);
-  text-decoration: none;
-  transition:
-    background-color 0.2s var(--arrive),
-    color 0.2s var(--arrive);
-}
-
-.more-cue:hover {
-  background: var(--fill);
-  color: var(--ink);
-}
-
-/* Below the first screen: one column, the slide's rules as dividers. */
-.feature,
-.facts,
-.session {
+/* Below the first screen: the example slide, the keys, the source. */
+.feature {
   width: var(--page);
-  margin: clamp(96px, 15vh, 168px) auto 0;
-}
-
-.feature-copy {
-  max-width: 760px;
   margin: 0 auto;
-  text-align: center;
 }
 
-.feature h2,
-.session h2 {
+.feature h2 {
   margin: 0;
+  text-align: center;
   font-size: clamp(32px, 4vw, 56px);
   font-weight: 700;
   line-height: 1.08;
@@ -609,17 +536,8 @@ kbd {
   text-wrap: balance;
 }
 
-.feature-copy p {
-  margin: 18px auto 0;
-  max-width: 38em;
-  font-size: clamp(18px, 1.45vw, 21px);
-  line-height: 1.5;
-  color: var(--ink-2);
-  text-wrap: pretty;
-}
-
 .preview {
-  margin: clamp(40px, 7vh, 72px) 0 0;
+  margin: clamp(32px, 5vh, 56px) 0 0;
 }
 
 /* A screen showing the slide: the page's own cream, lifted by its shadow. */
@@ -636,193 +554,41 @@ kbd {
   container-type: size;
 }
 
-.preview figcaption {
-  margin-top: 18px;
-  text-align: center;
-  font-size: 14px;
-  color: var(--ink-3);
-}
-
-.facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(28px, 4vw, 56px);
-}
-
-/* Privacy is what an organiser most needs to know: it gets the full width. */
-.fact.is-lead {
-  grid-column: 1 / -1;
-  padding: 0 0 clamp(28px, 5vh, 48px);
-  border-top: 0;
-  text-align: center;
-}
-
-.fact.is-lead h2 {
-  font-size: clamp(32px, 4vw, 56px);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.025em;
-}
-
-.fact.is-lead p {
-  max-width: 38em;
-  margin: 18px auto 0;
-  font-size: clamp(18px, 1.45vw, 21px);
-  line-height: 1.5;
-}
-
-.fact {
-  padding-top: 22px;
-  border-top: 2px solid var(--rule);
-}
-
-.fact h2 {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 650;
-  line-height: 1.25;
-  letter-spacing: -0.015em;
-  text-wrap: balance;
-}
-
-.fact p {
-  margin: 12px 0 0;
-  font-size: 16px;
-  line-height: 1.55;
-  color: var(--ink-2);
-}
-
-.text-button {
-  margin-top: 14px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--ink);
-  font-size: 16px;
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 4px;
-  text-decoration-color: var(--rule);
-  cursor: pointer;
-  transition: text-decoration-color 0.2s var(--arrive);
-}
-
-.text-button:hover:not(:disabled) {
-  text-decoration-color: var(--ink);
-}
-
-.session-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: clamp(32px, 6vw, 88px);
-  margin-top: clamp(28px, 4vh, 44px);
-}
-
-.tips {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 2px solid var(--rule);
-}
-
-.tips li {
-  padding: 16px 0;
-  border-bottom: 1px solid var(--hairline);
-  font-size: 18px;
-  line-height: 1.5;
-  letter-spacing: -0.005em;
-}
-
+/* The keys a volunteer at a laptop will want, in one quiet line. */
 .keys {
-  margin: 0;
-  border-top: 2px solid var(--rule);
-}
-
-.keys div {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--hairline);
-}
-
-.keys dt {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: var(--ink-3);
-}
-
-.keys dd {
-  margin: 0;
-  font-size: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 28px;
+  width: var(--page);
+  margin: clamp(56px, 9vh, 96px) auto 0;
+  font-size: 15px;
   color: var(--ink-2);
-  text-align: right;
 }
 
-.close {
-  padding: clamp(120px, 18vh, 200px) var(--margin) clamp(80px, 12vh, 140px);
-  text-align: center;
-}
-
-.close h2 {
-  margin: 0;
-  font-size: clamp(36px, 4.6vw, 64px);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-}
-
-/* The same action as the round button, so the same charcoal. */
-.close-listen {
+.keys span {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  height: 52px;
-  margin-top: 28px;
-  padding: 0 26px 0 22px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--ink);
-  color: var(--ground);
-  box-shadow: 0 16px 36px -18px rgba(51, 40, 20, 0.45);
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  transition:
-    background-color 0.2s var(--arrive),
-    transform 0.5s var(--glide);
+  gap: 8px;
 }
 
-.close-listen:hover:not(:disabled) {
-  background: #262626;
-}
-
-.close-listen:active:not(:disabled) {
-  transform: scale(0.97);
-  transition-duration: 0.15s;
-}
-
-.close-listen:disabled {
-  background: var(--fill);
-  color: var(--ink-3);
-  box-shadow: none;
-  cursor: default;
+/* No keyboard on a phone or tablet: no keys to show. */
+@media (hover: none) and (pointer: coarse) {
+  .keys {
+    display: none;
+  }
 }
 
 .footer {
   width: var(--page);
-  margin: 0 auto;
+  margin: clamp(56px, 9vh, 96px) auto 0;
   padding: 22px 0 40px;
   border-top: 1px solid var(--hairline);
 }
 
 .footer p {
   margin: 0;
+  text-align: center;
   font-size: 13px;
   line-height: 1.5;
   color: var(--ink-3);
@@ -1218,13 +984,6 @@ kbd {
 
 /* ---- smaller screens ----------------------------------------------------------- */
 
-@media (max-width: 860px) {
-  .facts,
-  .session-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 @media (max-width: 640px) {
   :root {
     --button: 112px;
@@ -1269,12 +1028,7 @@ kbd {
   }
 
   .hero {
-    min-height: calc(100svh - 56px);
-  }
-
-  .cycle {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
+    min-height: calc(90svh - 56px);
   }
 
   /* A squarer screen, so the example keeps its lines large. */
@@ -1283,11 +1037,6 @@ kbd {
     border-radius: 14px;
   }
 
-  .feature,
-  .facts,
-  .session {
-    margin-top: 72px;
-  }
 }
 
 /* ---- reduced motion: crossfades only ----------------------------------------- */

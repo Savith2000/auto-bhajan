@@ -55,11 +55,11 @@ the bhajan starting, without anyone searching a book, a binder or a phone.
 
 **Confirmed:**
 
-- A start page that says what the app does, by the user's request: a headline
-  and one-sentence lede, the listen button in the middle of the first screen,
-  the three-step cycle beneath it, and on scroll an example slide, privacy,
-  how it behaves when unsure, and tips and shortcuts for a session. Search is
-  in its top bar. Volunteers can still start in one tap.
+- A start page that says what the app does, by the user's request, once and
+  briefly (the user cut the explainer copy as unnecessary): a headline, one
+  sentence and the listen button on the first screen; on scroll, a real bhajan
+  shown as it appears on screen, the keyboard shortcuts and the source. Search
+  is in its top bar. Volunteers can still start in one tap.
 - One control while singing: listen. It shows the identified bhajan as a slide in
   the format centres already project: title with pitch (ladies / gents, e.g.
   "6 P / 2 P") centred over a rule, romanised lyrics left-aligned, the English

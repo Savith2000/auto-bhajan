@@ -325,11 +325,9 @@ export function App() {
       <Home
         catalog={catalog}
         visible={atHome}
-        ready={ready}
         fullscreen={fullscreen}
         scroller={homeScroller}
         slot={setSlotEl}
-        onListen={listen}
         onSearch={() => setSearchOpen(true)}
         onFullscreen={toggleFullscreen}
       />
@@ -459,7 +457,7 @@ function caption(
     case "idle":
       return "Tap when a bhajan begins";
     case "listening":
-      return phase.singing ? "Hearing singing…" : "Listening for a bhajan…";
+      return phase.singing ? "Finding the bhajan…" : "Listening for a bhajan…";
     case "identified":
       return "";
     case "gave-up":
@@ -471,12 +469,10 @@ function caption(
 /** A second, quieter line saying what the app is waiting for. */
 function captionHint(phase: Phase, ready: boolean, modelError: string | null): string {
   if (modelError || phase.kind === "error") return "";
-  if (!ready) return "The speech model downloads on your first visit, then loads from this device.";
+  if (!ready) return "The first visit downloads the speech model.";
   if (phase.kind !== "listening") return "";
-  if (phase.twin) return "Two bhajans begin with this line. Listening for the next one to tell them apart.";
-  return phase.singing
-    ? "Working out which bhajan this is. It shows within about 10 seconds."
-    : "Waiting for the first line to be sung.";
+  if (phase.twin) return "Two bhajans start this way. Waiting for the next line.";
+  return phase.singing ? "Usually within ten seconds." : "Waiting for the first line.";
 }
 
 /**

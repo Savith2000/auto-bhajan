@@ -76,11 +76,3 @@ export function HomeIcon({ size = 20 }: IconProps) {
     </svg>
   );
 }
-
-export function ChevronDownIcon({ size = 20 }: IconProps) {
-  return (
-    <svg {...base(size)}>
-      <path d="M6 9l6 6 6-6" />
-    </svg>
-  );
-}
