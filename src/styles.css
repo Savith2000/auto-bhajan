@@ -79,6 +79,9 @@ button {
    middle before the lyrics fill it. */
 .dock.is-docked {
   transform: translate(-50%, -50%) translateY(calc(50vh - var(--dock-gap))) scale(0.46);
+  /* The visible height: on iOS, vh assumes Safari's toolbar is hidden, which
+     would drop the button below its label and the corner controls. */
+  transform: translate(-50%, -50%) translateY(calc(50dvh - var(--dock-gap))) scale(0.46);
 }
 
 /* Under the docked button: what pressing it does now. It arrives after the
@@ -990,9 +993,10 @@ kbd {
     --dock-gap: 64px;
   }
 
+  /* On the docked button's centre line, so the bottom reads as one row. */
   .corner {
     right: 14px;
-    bottom: 14px;
+    bottom: calc(var(--dock-gap) - 20px);
   }
 
   /* No room for the button, its label and the corner controls side by side
@@ -1001,6 +1005,8 @@ kbd {
   .dock.is-docked {
     transform: translate(-50%, -50%)
       translate(calc(-50vw + var(--margin) + var(--button) * 0.23), calc(50vh - var(--dock-gap))) scale(0.46);
+    transform: translate(-50%, -50%)
+      translate(calc(-50vw + var(--margin) + var(--button) * 0.23), calc(50dvh - var(--dock-gap))) scale(0.46);
   }
 
   .next-label {
