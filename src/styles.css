@@ -110,9 +110,12 @@ button {
   transition: none;
 }
 
-/* ...with its caption close under it, reading as one group. */
-.dock.is-inline .caption {
-  top: calc(100% + 22px);
+/* ...with its caption close under it, reading as one group. The caption is
+   moved by transform, not `top`, so it glides there with the button (lifting
+   and landing) instead of snapping when the button settles into the page. */
+.dock.is-inline .caption,
+.dock.is-home .caption {
+  transform: translate(-50%, 0);
 }
 
 /* Lifting out of the slot (painted there first, no transition) and landing
@@ -295,12 +298,13 @@ button {
 
 /* ---- caption and fallback choices ----------------------------------------- */
 
+/* 56px under the button (22px + 34px), clear of the rings; 22px on the start page. */
 .caption {
   position: absolute;
   z-index: 1;
-  top: calc(100% + 56px);
+  top: calc(100% + 22px);
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, 34px);
   width: max-content;
   max-width: min(84vw, 560px);
   margin: 0;
@@ -310,7 +314,9 @@ button {
   letter-spacing: -0.01em;
   line-height: 1.35;
   color: var(--ink-2);
-  transition: opacity 0.3s var(--arrive);
+  transition:
+    opacity 0.3s var(--arrive),
+    transform 0.95s var(--glide);
 }
 
 .caption.is-empty,

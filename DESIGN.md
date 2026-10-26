@@ -354,7 +354,7 @@ The whole product in one object: a charcoal circle that listens.
 - **One object, four places:** on the start page the button is page content, placed in the hero's slot so it scrolls, tabs and swipes with the page (inline). When listening starts it lifts into a fixed layer painted exactly over the slot (lifting), then glides to dead centre over 0.95s (floating) while the page fades out. When a bhajan is found it glides at once to the bottom centre and scales to 0.46 (docked), out of the middle before the lyrics fill it; its caption fades out. While docked, a label beneath it says what pressing it does now, "Tap for the next bhajan" (16px, 500, Charcoal; clicking it does the same), fading in at 0.8s as the button settles. Tapped again, it glides back to centre for the next bhajan. Going home scrolls the page to the top and the button glides back onto its slot (landing) before settling into the page. Keyboard focus follows it through every move.
 
 ### Caption
-- **Style:** Body type in Soft Charcoal, centred under the button (22px below in the page, 56px below when floating), one short status sentence, fading over 0.3s. It is a live status region.
+- **Style:** Body type in Soft Charcoal, centred under the button (22px below in the page, 56px below when floating, gliding between the two with the button, never snapping), one short status sentence, fading over 0.3s. It is a live status region.
 - **Voice:** plain and short: "Tap when a bhajan begins", "Getting ready…", "Listening for a bhajan…", "Hearing singing…", "Is it one of these?", or a one-sentence recovery instruction on failure.
 - **Hint:** a second line in Note type and Quiet Charcoal says what the app is waiting for, e.g. "Waiting for the first line to be sung."
 
