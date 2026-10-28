@@ -16,7 +16,7 @@
 import { MicCapture, TARGET_SAMPLE_RATE } from "../audio/capture.ts";
 import { RingBuffer } from "../audio/ring-buffer.ts";
 import { matchKey, type Reference } from "../match/catalog.ts";
-import { combine, isClear, isMatch, rank, RULES, twinOf, type Ranking } from "../match/identify.ts";
+import { combine, isClear, isMatch, RULES, twinOf, type Ranking } from "../match/identify.ts";
 import type { AsrClient } from "./asr-client.ts";
 import { ONSET, OnsetDetector } from "./onset.ts";
 import { frameSample, WORDS } from "./words.ts";
@@ -208,8 +208,9 @@ export class ListenSession {
       }
       if (this.stopped) return "done";
 
+      // Both rankings arrive from the worker, so the page never stalls on them.
       const query = matchKey(result.text);
-      const byText = query ? rank(query, this.refs, { keep: Infinity }) : null;
+      const byText = result.byText;
       const bySound = result.sound;
       const ranking = byText && bySound ? combine(byText, bySound, this.refs) : byText;
       const top = ranking?.candidates[0];
@@ -224,7 +225,7 @@ export class ListenSession {
         byText: byText && { ...byText, candidates: byText.candidates.slice(0, 3) },
         bySound: bySound && { ...bySound, candidates: bySound.candidates.slice(0, 3) },
         twin,
-        inferenceMs: result.inferenceMs + result.soundMs,
+        inferenceMs: result.inferenceMs + result.soundMs + result.textMs,
       });
 
       if (top && real && (isClear(ranking) || (deciding && twin === null))) {

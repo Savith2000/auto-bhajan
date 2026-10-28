@@ -21,10 +21,11 @@ import {
   type Processor,
 } from "@huggingface/transformers";
 
-import type { Reference } from "../match/catalog.ts";
+import { matchKey, type Reference } from "../match/catalog.ts";
 import { classLogProbs, soundClasses, type SoundClasses } from "../match/ctc-score.ts";
 import {
   encodeReferences,
+  rank,
   rankBySound,
   type EncodedReference,
   type Ranking,
@@ -161,6 +162,14 @@ export type AsrResult = {
   sound: Ranking | null;
   /** Time spent on that scoring. */
   soundMs: number;
+  /**
+   * Every bhajan ranked by the transcript's words, best first, when scored.
+   * Done here rather than on the page because it grows with the transcript
+   * (tens of ms, hundreds on a phone) and would stall the page's animation.
+   */
+  byText: Ranking | null;
+  /** Time spent on that ranking. */
+  textMs: number;
 };
 
 export type AsrError = { type: "error"; id?: number; message: string };
@@ -562,6 +571,11 @@ self.addEventListener("message", async (event: MessageEvent<AsrRequest>) => {
           )
         : null;
 
+      const textStarted = performance.now();
+      const query = matchKey(text);
+      const textRanking = request.score !== false && refs && query ? rank(query, refs, { keep: Infinity }) : null;
+      const textMs = performance.now() - textStarted;
+
       const result: AsrResult = {
         type: "result",
         id: request.id,
@@ -571,7 +585,9 @@ self.addEventListener("message", async (event: MessageEvent<AsrRequest>) => {
         frames,
         wordFrame,
         sound: soundRanking,
-        soundMs: performance.now() - scoringStarted,
+        soundMs: textStarted - scoringStarted,
+        byText: textRanking,
+        textMs,
       };
       self.postMessage(result);
     }
