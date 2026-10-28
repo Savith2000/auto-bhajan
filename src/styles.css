@@ -1,21 +1,31 @@
 /*
- * AutoBhajan, laid out and coloured like the bhajan slides Sai centres already
- * project (the user's reference): a warm cream page, charcoal type, grey rules.
- * Title and pitch centred over a rule, lyrics left-aligned below, the English
- * meaning in italics over a closing rule. Apple-style around it: a start page
- * that explains itself in a product page's voice, one round button, glide
- * motion, and nothing else on screen once the words are up.
+ * AutoBhajan, laid out like the bhajan slides Sai centres already project
+ * (title and pitch centred over a rule, lyrics left-aligned below, the English
+ * meaning in italics over a closing rule) and coloured as the Sai
+ * organisation's own: the slide's warm cream page, navy ink from the brand
+ * blue, saffron for the button, the rules and the rings, and the lighter ray
+ * orange for the frame around Swami's photo. Apple-style restraint around it:
+ * one round button, glide motion, and nothing else on screen once the words
+ * are up.
  */
 
 :root {
   color-scheme: light;
   --ground: #fdf8e8;
-  --ink: #333333;
-  --ink-2: #4d4d4d;
-  --ink-3: #5c5c5c;
-  --rule: #9e9e9e;
-  --fill: rgba(51, 51, 51, 0.07);
-  --fill-hover: rgba(51, 51, 51, 0.13);
+  /* Inks: the brand blue pushed toward ink, in three strengths. */
+  --ink: #0e2a4d;
+  --ink-2: #3b4e6b;
+  --ink-3: #56667f;
+  /* The Sai organisation's colours, sampled from its emblem. */
+  --blue: #0c5098;
+  --saffron: #ee7900;
+  --ray: #fbba74;
+  /* Saffron a step deeper, so the button's cream glyph holds 3:1. */
+  --saffron-deep: #e06f00;
+  --rule: var(--saffron);
+  --fill: rgba(12, 80, 152, 0.07);
+  --fill-hover: rgba(12, 80, 152, 0.13);
+  --shadow: rgba(14, 42, 77, 0.4);
   /* iOS-like glide for things that move (no overshoot); exponential ease-out for arrivals. */
   --glide: cubic-bezier(0.32, 0.72, 0, 1);
   --arrive: cubic-bezier(0.16, 1, 0.3, 1);
@@ -26,7 +36,9 @@
   --dock-band: calc(var(--dock-gap) + 56px);
   /* the start page's content column */
   --page: min(1120px, calc(100% - 2 * var(--margin)));
-  --hairline: rgba(51, 51, 51, 0.12);
+  --hairline: rgba(14, 42, 77, 0.12);
+  /* an unlit bead on the listening ring */
+  --rule-quiet: rgba(14, 42, 77, 0.3);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue",
     "Segoe UI", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -52,7 +64,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--blue);
   outline-offset: 4px;
 }
 
@@ -131,20 +143,25 @@ button {
   transition: none;
 }
 
-/* The speech model's first download, drawn around the waiting button. */
-.progress {
+/* The speech model's first download, drawn around the waiting button; the
+   listening progress takes the same place. */
+.progress,
+.listen-progress {
   position: absolute;
-  inset: -12px;
-  width: calc(100% + 24px);
-  height: calc(100% + 24px);
+  inset: -16px;
+  width: calc(100% + 32px);
+  height: calc(100% + 32px);
   transform: rotate(-90deg);
   pointer-events: none;
 }
 
+/* Stroke widths are in the ring's own units (it spans the button plus 32px,
+   so 1.5 is about 2.4px on the 132px button). Not non-scaling-stroke: that
+   measures dashes in screen pixels, which breaks pathLength and starts the
+   arcs in the wrong place. */
 .progress circle {
   fill: none;
-  stroke-width: 2.4;
-  vector-effect: non-scaling-stroke;
+  stroke-width: 1.5;
 }
 
 .progress-track {
@@ -152,9 +169,91 @@ button {
 }
 
 .progress-fill {
-  stroke: var(--ink-3);
+  stroke: var(--saffron);
   stroke-linecap: round;
   transition: stroke-dashoffset 0.6s var(--arrive);
+}
+
+/* Listening progress: from the first sung word, an arc toward the moment the
+   app must answer, with a bead per check that lights once the check has run.
+   It follows the session's clock (ListenProgress sets the arc each frame), so
+   the arc has no transition while it runs; an answer closes it quickly, a
+   false start drains it. */
+.listen-progress {
+  opacity: 0;
+  transition: opacity 0.5s var(--arrive);
+}
+
+.listen-progress.is-running {
+  opacity: 1;
+}
+
+/* Closed on an answer, it fades as the button docks. */
+.listen-progress.is-done {
+  opacity: 0;
+  transition: opacity 0.45s var(--arrive) 0.4s;
+}
+
+.listen-progress circle {
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.listen-progress-track {
+  stroke: var(--hairline);
+}
+
+.listen-progress-arc {
+  stroke: var(--saffron);
+  stroke-linecap: round;
+  transition:
+    stroke-dashoffset 0.6s var(--arrive),
+    stroke 0.4s var(--arrive);
+}
+
+.listen-progress.is-running .listen-progress-arc {
+  transition: stroke 0.4s var(--arrive);
+}
+
+.listen-progress.is-done .listen-progress-arc {
+  transition: stroke-dashoffset 0.35s var(--arrive);
+}
+
+/* On the second lap the first stays drawn, quieter, under it. */
+.listen-progress.is-twin .lap-0 {
+  stroke: var(--ray);
+}
+
+.listen-progress-beads {
+  opacity: 0;
+  transition: opacity 0.4s var(--arrive);
+}
+
+.listen-progress-beads.is-current {
+  opacity: 1;
+}
+
+.listen-progress .listen-progress-bead {
+  fill: var(--ground);
+  stroke: var(--rule-quiet);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    fill 0.3s var(--arrive),
+    stroke 0.3s var(--arrive);
+}
+
+.listen-progress .listen-progress-bead.is-lit {
+  fill: var(--saffron);
+  stroke: var(--saffron);
+  animation: bead 0.5s var(--arrive);
+}
+
+@keyframes bead {
+  from {
+    transform: scale(1.9);
+  }
 }
 
 .listen {
@@ -163,14 +262,14 @@ button {
   height: 100%;
   border: 0;
   border-radius: 50%;
-  background: var(--ink);
-  color: var(--ground);
+  background: var(--saffron-deep);
+  color: #fffdf5;
   display: grid;
   place-items: center;
   cursor: pointer;
   box-shadow:
-    0 22px 50px -20px rgba(51, 40, 20, 0.45),
-    0 2px 6px rgba(51, 40, 20, 0.18);
+    0 22px 50px -20px rgba(170, 72, 0, 0.6),
+    0 2px 6px rgba(120, 50, 0, 0.2);
   transition:
     transform 0.5s var(--glide),
     background-color 0.4s var(--arrive),
@@ -179,7 +278,7 @@ button {
 
 .listen:hover:not(:disabled) {
   transform: scale(1.04);
-  background: #262626;
+  background: #d26800;
 }
 
 .listen:active:not(:disabled) {
@@ -224,7 +323,7 @@ button {
   inset: 0;
   border-radius: 50%;
   background: transparent;
-  box-shadow: inset 0 0 0 2px var(--rule);
+  box-shadow: inset 0 0 0 2px var(--ray);
   opacity: 0;
   animation: ripple 3s var(--arrive) infinite paused;
   transition: box-shadow 0.6s var(--arrive);
@@ -246,13 +345,10 @@ button {
   animation-play-state: running;
 }
 
-/* Once singing is heard the rings darken and strengthen, and the bars move. */
+/* Once singing is heard the progress ring takes over: the ripples quieten
+   (same rhythm, never restarted) and the bars move. */
 .listen.is-hearing .rings {
-  opacity: 1;
-}
-
-.listen.is-hearing .ring {
-  box-shadow: inset 0 0 0 2px var(--ink-3);
+  opacity: 0.4;
 }
 
 .listen.is-hearing .listen-face path {
@@ -414,9 +510,17 @@ button {
 }
 
 .wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.emblem {
+  width: 44px;
+  height: 44px;
 }
 
 .topbar-actions {
@@ -461,7 +565,7 @@ kbd {
   min-width: 24px;
   height: 24px;
   padding: 0 7px;
-  border: 1px solid rgba(51, 51, 51, 0.18);
+  border: 1px solid rgba(14, 42, 77, 0.18);
   border-bottom-width: 2px;
   border-radius: 7px;
   background: #fffdf5;
@@ -481,8 +585,9 @@ kbd {
   color: var(--ink-2);
 }
 
-/* The first screen: the headline, one sentence, the button. A little short of
-   the full height, so the example below shows its heading at the foot. */
+/* The first screen: Swami's photo, the headline, one sentence, the button. A
+   little short of the full height, so the example below shows its heading at
+   the foot. */
 .hero {
   display: flex;
   flex-direction: column;
@@ -494,14 +599,42 @@ kbd {
   text-align: center;
 }
 
+/* Swami's photo, framed as on a centre's altar: an arch, a ray-orange line
+   around it, a little cream between. */
+.altar {
+  flex: none;
+  height: clamp(130px, 27svh, 300px);
+  aspect-ratio: 4 / 5;
+  margin: 0 0 clamp(20px, 3.4vh, 36px);
+  padding: 5px;
+  box-sizing: border-box;
+  border: 2px solid var(--ray);
+  border-radius: 50% 50% 18px 18px / 40% 40% 18px 18px;
+  background: var(--ground);
+  box-shadow: 0 34px 60px -34px rgba(170, 72, 0, 0.55);
+  animation: rise 1.05s var(--arrive) both;
+}
+
+.altar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50% 50% 13px 13px / 40% 40% 13px 13px;
+}
+
 .hero h1 {
   margin: 0;
-  font-size: clamp(36px, min(6vw, 8.2vh), 84px);
+  font-size: clamp(34px, min(5.2vw, 7vh), 76px);
   font-weight: 700;
   line-height: 1.04;
   letter-spacing: -0.03em;
   text-wrap: balance;
-  animation: rise 1.05s var(--arrive) both;
+  animation: rise 1.05s var(--arrive) 0.08s both;
+}
+
+.hero-accent {
+  color: var(--blue);
 }
 
 .hero-lede {
@@ -512,7 +645,7 @@ kbd {
   letter-spacing: -0.01em;
   color: var(--ink-2);
   text-wrap: balance;
-  animation: rise 1.05s var(--arrive) 0.12s both;
+  animation: rise 1.05s var(--arrive) 0.16s both;
 }
 
 /* The button's place; its caption hangs below, inside the hero's padding. */
@@ -550,8 +683,8 @@ kbd {
   border-radius: 20px;
   background: var(--ground);
   box-shadow:
-    0 50px 100px -48px rgba(51, 40, 20, 0.5),
-    0 2px 8px rgba(51, 40, 20, 0.08),
+    0 50px 100px -48px var(--shadow),
+    0 2px 8px rgba(14, 42, 77, 0.08),
     0 0 0 1px var(--hairline);
   overflow: hidden;
   container-type: size;
@@ -587,6 +720,13 @@ kbd {
   margin: clamp(56px, 9vh, 96px) auto 0;
   padding: 22px 0 40px;
   border-top: 1px solid var(--hairline);
+}
+
+.footer-emblem {
+  display: block;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 14px;
 }
 
 .footer p {
@@ -646,7 +786,7 @@ kbd {
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.01em;
-  color: var(--ink);
+  color: var(--blue);
   text-wrap: balance;
   animation: rise 1.05s var(--arrive) both;
 }
@@ -789,8 +929,8 @@ kbd {
   -webkit-backdrop-filter: blur(30px) saturate(1.3);
   backdrop-filter: blur(30px) saturate(1.3);
   box-shadow:
-    0 28px 70px -24px rgba(51, 40, 20, 0.45),
-    inset 0 0 0 1px rgba(51, 51, 51, 0.1);
+    0 28px 70px -24px var(--shadow),
+    inset 0 0 0 1px var(--hairline);
   z-index: 3;
   transform-origin: bottom right;
   animation: pop 0.4s var(--glide);
@@ -898,8 +1038,8 @@ kbd {
   -webkit-backdrop-filter: blur(30px) saturate(1.3);
   backdrop-filter: blur(30px) saturate(1.3);
   box-shadow:
-    0 28px 70px -24px rgba(51, 40, 20, 0.45),
-    inset 0 0 0 1px rgba(51, 51, 51, 0.1);
+    0 28px 70px -24px var(--shadow),
+    inset 0 0 0 1px var(--hairline);
   overflow: hidden;
   animation: pop 0.4s var(--glide);
 }
@@ -944,7 +1084,7 @@ kbd {
   padding: 6px;
   list-style: none;
   overflow-y: auto;
-  border-top: 1px solid rgba(51, 51, 51, 0.1);
+  border-top: 1px solid var(--hairline);
 }
 
 .search-hit {
@@ -1037,6 +1177,10 @@ kbd {
     min-height: calc(90svh - 56px);
   }
 
+  .altar {
+    height: clamp(120px, 24svh, 220px);
+  }
+
   /* A squarer screen, so the example keeps its lines large. */
   .preview-screen {
     aspect-ratio: 1 / 1;
@@ -1057,6 +1201,7 @@ kbd {
     transform: none;
   }
 
+  .altar,
   .hero h1,
   .hero-lede {
     animation-name: fade;
@@ -1064,7 +1209,8 @@ kbd {
   }
 
   .ring,
-  .listen.is-hearing .listen-face path {
+  .listen.is-hearing .listen-face path,
+  .listen-progress .listen-progress-bead.is-lit {
     animation: none;
   }
 

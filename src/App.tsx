@@ -18,17 +18,22 @@ import type { AsrProgress, AsrReady } from "./asr/asr.worker.ts";
 import { AsrClient } from "./listen/asr-client.ts";
 import { ListenSession, type SessionUpdate } from "./listen/session.ts";
 import { buildReferences, type Bhajan, type Reference } from "./match/catalog.ts";
-import type { Ranking } from "./match/identify.ts";
+import { RULES, type Ranking } from "./match/identify.ts";
 import { buildSearchIndex } from "./match/search.ts";
 import { Home } from "./ui/Home.tsx";
+import { ListenProgress } from "./ui/ListenProgress.tsx";
 import { CollapseIcon, ExpandIcon, HomeIcon, MoreIcon, SearchIcon, WaveIcon } from "./ui/icons.tsx";
 import { distinguishingLine, Lyrics } from "./ui/Lyrics.tsx";
 import { Search } from "./ui/Search.tsx";
 
 type Phase =
   | { kind: "idle" }
-  /** twin: listening on past 10 s because two bhajans open the same way. */
-  | { kind: "listening"; singing: boolean; twin: boolean }
+  /**
+   * since: when the first sung words began (performance.now ms), null while
+   * waiting for them. twin: listening on past 10 s because two bhajans open
+   * the same way. checked: the checkpoints whose checks have run.
+   */
+  | { kind: "listening"; singing: boolean; twin: boolean; since: number | null; checked: number[] }
   /** ranking is null when the bhajan was chosen by search rather than heard. */
   | { kind: "identified"; index: number; ranking: Ranking | null }
   | { kind: "gave-up"; ranking: Ranking | null; heardSinging: boolean }
@@ -184,16 +189,24 @@ export function App() {
       setLeaving(true);
       window.setTimeout(() => setShown(null), LEAVE_MS);
     }
-    setPhase({ kind: "listening", singing: false, twin: false });
+    setPhase({ kind: "listening", singing: false, twin: false, since: null, checked: [] });
     const s = new ListenSession(asr, refs, (u) => {
       if (u.kind === "hearing") {
-        setPhase((p) => (p.kind === "listening" && !p.singing ? { ...p, singing: true } : p));
+        // The words are found a little after they begin; date them from their start.
+        const since = performance.now() - u.seconds * 1000;
+        setPhase((p) => (p.kind === "listening" && !p.singing ? { ...p, singing: true, since } : p));
       } else if (u.kind === "waiting") {
         // Back to waiting after a false start.
-        setPhase((p) => (p.kind === "listening" && p.singing ? { ...p, singing: false, twin: false } : p));
+        setPhase((p) =>
+          p.kind === "listening" && p.singing ? { ...p, singing: false, twin: false, since: null, checked: [] } : p,
+        );
       } else if (u.kind === "check") {
         setChecks((c) => [...c, u]);
-        if (u.twin !== null) setPhase((p) => (p.kind === "listening" && !p.twin ? { ...p, twin: true } : p));
+        setPhase((p) =>
+          p.kind === "listening"
+            ? { ...p, checked: [...p.checked, u.at], twin: p.twin || u.twin !== null }
+            : p,
+        );
       }
       else if (u.kind === "identified") show(u.index, u.ranking);
       else if (u.kind === "gave-up") setPhase({ kind: "gave-up", ranking: u.ranking, heardSinging: u.heardSinging });
@@ -266,6 +279,7 @@ export function App() {
       : [];
   const text = caption(phase, ready, model, modelError, progress);
   const hint = captionHint(phase, ready, modelError);
+  const listeningPhase = phase.kind === "listening" ? phase : null;
   // Download progress, drawn around the button while the speech model loads.
   const loaded = model ? 1 : (progress?.fraction ?? 0);
 
@@ -285,6 +299,14 @@ export function App() {
               strokeDashoffset={1 - loaded}
             />
           </svg>
+        )}
+        {ready && (
+          <ListenProgress
+            since={listeningPhase?.since ?? null}
+            twin={listeningPhase?.twin ?? false}
+            checked={listeningPhase?.checked ?? []}
+            found={docked}
+          />
         )}
         <button
           ref={listenButton}
@@ -472,7 +494,10 @@ function captionHint(phase: Phase, ready: boolean, modelError: string | null): s
   if (!ready) return "The first visit downloads the speech model.";
   if (phase.kind !== "listening") return "";
   if (phase.twin) return "Two bhajans start this way. Waiting for the next line.";
-  return phase.singing ? "Usually within ten seconds." : "Waiting for the first line.";
+  if (!phase.singing) return "Waiting for the first line.";
+  // Follows the checks drawn on the ring: before the first, after it, near the end.
+  if (phase.checked.length === 0) return "Heard singing.";
+  return phase.checked.length < RULES.checkpoints.length - 1 ? "Narrowing it down." : "Almost there.";
 }
 
 /**

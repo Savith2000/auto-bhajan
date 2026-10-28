@@ -56,8 +56,8 @@ the bhajan starting, without anyone searching a book, a binder or a phone.
 **Confirmed:**
 
 - A start page that says what the app does, by the user's request, once and
-  briefly (the user cut the explainer copy as unnecessary): a headline, one
-  sentence and the listen button on the first screen; on scroll, a real bhajan
+  in as few words as possible: Swami's photo, a headline, one sentence and the
+  listen button on the first screen; on scroll, a real bhajan
   shown as it appears on screen, the keyboard shortcuts and the source. Search
   is in its top bar. Volunteers can still start in one tap.
 - One control while singing: listen. It shows the identified bhajan as a slide in
@@ -85,21 +85,26 @@ the bhajan starting, without anyone searching a book, a binder or a phone.
 - **Apple-style design, by the user's explicit choice.** Minimal, smooth and
   clean, executed straight and at Apple's level of craft: no concept worlds,
   textures or ornament. Apple's own interfaces are the quality bar.
-- **The centres' bhajan-slide look, by the user's explicit choice (supersedes
-  the earlier dark Sai Samathee palette).** A warm cream page (`#FDF8E8`),
-  charcoal type (`#333333`), grey rules (`#9E9E9E`), from a slide the user
-  shared, used across the whole app, start page included (the user's choice).
-  Apple-style restraint around it: one round button, smooth motion, and
-  nothing but the slide on screen once a bhajan is up.
-- Whether official organisation logos appear is undecided; none are in this
-  repository.
+- **The centres' bhajan-slide layout in the Sai organisation's colours, by
+  the user's explicit choice (October 2026).** The slide's warm cream page
+  (`#FDF8E8`) stays. Everything else follows the Sai centre's look: navy ink
+  from the brand blue, brand blue `#0C5098` for titles, saffron `#EE7900` for
+  the listen button, the slide's rules and the rings, ray orange `#FBBA74`
+  around Swami's photo (values from the Voice Seva brand spec, sampled from
+  the emblem). Apple-style restraint around it: one round button, smooth
+  motion, and nothing but the slide on screen once a bhajan is up.
+- **Logo:** the Sri Sathya Sai Global Council, U.S.A. general emblem, in the
+  top bar and footer. Not the 100th or 99th birthday logos (the user's
+  instruction).
 
 ## Evidence on Hand
 
 - `public/catalog.json`: every bhajan's title, romanised lyrics, Devanagari and
   English meaning. Real content, usable in any design.
-- No photography, illustration, logos, testimonials or usage figures exist.
-  None may be invented.
+- The user supplied the emblem and photos of Swami (October 2026). The start
+  page shows six of them (`src/assets/swami/`), one per visit, chosen for being
+  clear, in colour, and free of text overlays and heavy edits. No
+  illustration, testimonials or usage figures exist; none may be invented.
 
 ## Product Principles
 

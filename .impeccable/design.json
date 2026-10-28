@@ -6,33 +6,8 @@
     "colorMeta": {
       "ink": {
         "role": "primary",
-        "displayName": "Charcoal",
-        "canonical": "#333333",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(38% 0 0)",
-          "oklch(50% 0 0)",
-          "oklch(62% 0 0)",
-          "oklch(74% 0 0)",
-          "oklch(85% 0 0)",
-          "oklch(95% 0 0)"
-        ]
-      },
-      "ink-deep": {
-        "role": "primary",
-        "displayName": "Deep Charcoal",
-        "canonical": "#262626",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(38% 0 0)",
-          "oklch(50% 0 0)",
-          "oklch(62% 0 0)",
-          "oklch(74% 0 0)",
-          "oklch(85% 0 0)",
-          "oklch(95% 0 0)"
-        ]
+        "displayName": "Navy Ink",
+        "canonical": "#0e2a4d"
       },
       "ground": {
         "role": "neutral",
@@ -51,93 +26,33 @@
       },
       "ink-2": {
         "role": "neutral",
-        "displayName": "Soft Charcoal",
-        "canonical": "#4d4d4d",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(38% 0 0)",
-          "oklch(50% 0 0)",
-          "oklch(62% 0 0)",
-          "oklch(74% 0 0)",
-          "oklch(85% 0 0)",
-          "oklch(95% 0 0)"
-        ]
+        "displayName": "Soft Navy",
+        "canonical": "#3b4e6b"
       },
       "ink-3": {
         "role": "neutral",
-        "displayName": "Quiet Charcoal",
-        "canonical": "#5c5c5c",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(38% 0 0)",
-          "oklch(50% 0 0)",
-          "oklch(62% 0 0)",
-          "oklch(74% 0 0)",
-          "oklch(85% 0 0)",
-          "oklch(95% 0 0)"
-        ]
+        "displayName": "Quiet Navy",
+        "canonical": "#56667f"
       },
       "rule": {
-        "role": "neutral",
-        "displayName": "Rule Grey",
-        "canonical": "#9e9e9e",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(38% 0 0)",
-          "oklch(50% 0 0)",
-          "oklch(62% 0 0)",
-          "oklch(74% 0 0)",
-          "oklch(85% 0 0)",
-          "oklch(95% 0 0)"
-        ]
+        "role": "primary",
+        "displayName": "Saffron Rule",
+        "canonical": "#ee7900"
       },
       "hairline": {
         "role": "neutral",
         "displayName": "Hairline",
-        "canonical": "rgba(51, 51, 51, 0.12)",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(38% 0 0)",
-          "oklch(50% 0 0)",
-          "oklch(62% 0 0)",
-          "oklch(74% 0 0)",
-          "oklch(85% 0 0)",
-          "oklch(95% 0 0)"
-        ]
+        "canonical": "rgba(14, 42, 77, 0.12)"
       },
       "fill": {
         "role": "neutral",
         "displayName": "Shade",
-        "canonical": "rgba(51, 51, 51, 0.07)",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(38% 0 0)",
-          "oklch(50% 0 0)",
-          "oklch(62% 0 0)",
-          "oklch(74% 0 0)",
-          "oklch(85% 0 0)",
-          "oklch(95% 0 0)"
-        ]
+        "canonical": "rgba(12, 80, 152, 0.07)"
       },
       "fill-hover": {
         "role": "neutral",
         "displayName": "Shade Deeper",
-        "canonical": "rgba(51, 51, 51, 0.13)",
-        "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(26% 0 0)",
-          "oklch(38% 0 0)",
-          "oklch(50% 0 0)",
-          "oklch(62% 0 0)",
-          "oklch(74% 0 0)",
-          "oklch(85% 0 0)",
-          "oklch(95% 0 0)"
-        ]
+        "canonical": "rgba(12, 80, 152, 0.13)"
       },
       "glass": {
         "role": "neutral",
@@ -168,6 +83,31 @@
           "oklch(86% 0.012 100)",
           "oklch(99% 0.012 100)"
         ]
+      },
+      "blue": {
+        "role": "primary",
+        "displayName": "Brand Blue",
+        "canonical": "#0c5098"
+      },
+      "saffron": {
+        "role": "primary",
+        "displayName": "Saffron",
+        "canonical": "#ee7900"
+      },
+      "saffron-deep": {
+        "role": "primary",
+        "displayName": "Deep Saffron",
+        "canonical": "#e06f00"
+      },
+      "saffron-press": {
+        "role": "primary",
+        "displayName": "Saffron Press",
+        "canonical": "#d26800"
+      },
+      "ray": {
+        "role": "secondary",
+        "displayName": "Ray Orange",
+        "canonical": "#fbba74"
       }
     },
     "typographyMeta": {
@@ -408,120 +348,73 @@
     }
   ],
   "narrative": {
-    "northStar": "The Centre's Slide",
-    "overview": "AutoBhajan puts up the slide the Sai centre already projects, by the user's explicit choice, from a reference slide they shared: a warm cream page, charcoal type and grey rules. The bhajan's name and its pitch sit bold and centred over a rule, the romanised lyrics are left-aligned below in regular weight, and the English meaning closes the slide in italics over a second rule. The room already knows how to read this layout. The same cream, charcoal and grey carry the whole app, start page included, again by the user's choice. Around the slide the app is Apple canon: a start page in the voice of an Apple product page (tight 700 headlines, soft-charcoal ledes, generous air), one round charcoal button that listens, Shazam-style rings, lines that rise out of a blur as in Apple Music's lyrics view, and motion that glides and never bounces. It is executed straight, with no concept world, texture or ornament, and no colour beyond the slide's own.\n\nThere are two densities. The start page says what the app does once, and then shows it: a sticky bar with the wordmark and search, a headline, one sentence, and the listen button with its caption; on scroll, a real bhajan set in a screen under one heading, a single line of keyboard shortcuts, and the source. No explanatory blurbs. The moment listening starts, the page clears and the screen holds only what the room needs this second: the button and its grey rings, then the slide with the button docked small beneath it. Everything the volunteer might need beyond that (home, search, other matches, what was heard, full screen) sits in quiet shaded circles in the bottom-right corner. The slide's scale is set for a projector read from the back of a hall by an audience that skews older.\n\nThe system is light only (`color-scheme: light`, theme colour cream). Charcoal on cream holds about 11.9:1, so the words stay strong on a washed-out projector.",
+    "northStar": "The Centre's Slide, in the Centre's Colours",
+    "overview": "AutoBhajan puts up the slide the Sai centre already projects, from a reference slide the user shared: a warm cream page, the bhajan's name and pitch bold and centred over a rule, the romanised lyrics left-aligned below in regular weight, and the English meaning in italics over a closing rule. The room already knows how to read this layout. Since October 2026, by the user's request, the app wears the Sai organisation's own colours rather than the slide's greys: the cream ground stays, the type is a navy ink drawn from the brand blue, titles are brand blue, and saffron (the colour of Swami's robe and of the emblem's centre) carries the listen button, the slide's rules and the listening rings. The Sri Sathya Sai Global Council, U.S.A. emblem (the general emblem, never the 100th birthday one) sits in the top bar and closes the start page, and a photo of Swami, framed in an arch as on a centre's altar, opens it. Around that the app keeps Apple-style restraint: one round button, Shazam-style rings, lines that rise out of a blur, and motion that glides and never bounces.\n\nThere are two densities. The start page says what the app does in as few words as possible and then shows it: a sticky bar with the emblem, wordmark and search; Swami's photo; the headline \"Sing a bhajan. See the words.\" and one sentence; and the listen button with its caption. On scroll, a real bhajan set in a screen under \"What the hall sees\", a single line of keyboard shortcuts, the emblem and the source. The moment listening starts, the page clears and the screen holds only what the room needs this second: the button and its rings, then the slide with the button docked small beneath it. Everything the volunteer might need beyond that (home, search, other matches, what was heard, full screen) sits in quiet shaded circles in the bottom-right corner. The slide's scale is set for a projector read from the back of a hall by an audience that skews older.\n\nThe system is light only (`color-scheme: light`, theme colour cream). Navy ink on cream holds about 13.6:1 and the blue title 7.6:1, so the words stay strong on a washed-out projector.",
     "keyCharacteristics": [
-      "Warm cream page, charcoal type, grey 2px rules, everywhere; no other hue.",
+      "Warm cream page; navy ink; brand-blue titles; saffron button, rules and rings; ray orange only around Swami's photo.",
+      "The Sri Sathya Sai Global Council, U.S.A. emblem in the top bar and footer, never recoloured or captioned.",
+      "Swami's photo on the start page, one of six, a different one each visit, in an arched frame.",
       "The slide: bold centred title with pitch over a rule, left-aligned regular-weight lyrics, italic meaning over a closing rule.",
       "Lyrics sized to fill the space between the rules, one sung line per row.",
-      "One solid charcoal object: the round listen button.",
+      "One solid saffron object: the round listen button.",
       "One system type stack (SF Pro on Apple devices); page headlines are 700 and tightly tracked, the sung words are 400.",
       "The button is one object that sits in the page, lifts out, glides to the middle, docks under the slide and lands back.",
       "Glide and exponential ease-out motion; nothing overshoots, nothing moves while people sing."
     ],
     "rules": [
-      {
-        "name": "The Slide Palette Rule",
-        "body": "Cream, charcoal and grey only, on every surface, the start page included. No accent hue, no gradient wash, no glow, no tinted band."
-      },
-      {
-        "name": "The One Solid Rule",
-        "body": "The round listen button is the only solid charcoal object. Everything else is type, a rule, a hairline, a 7% shade or cream glass."
-      },
-      {
-        "name": "The Grey Is A Line Rule",
-        "body": "Rule Grey and Hairline draw lines and ring outlines only. Text starts at Quiet Charcoal."
-      },
-      {
-        "name": "The Page Voice Rule",
-        "body": "Start-page statements are 700 with tight tracking (-0.025em to -0.03em) and balanced wrapping. The slide never borrows that tracking: its title is -0.01em and its lyrics -0.005em."
-      },
-      {
-        "name": "The Say It Once Rule",
-        "body": "The start page says what the app does once (the headline and one sentence) and then shows it (the example slide). No step-by-step explainer, no feature blurbs, no repeated call to action; anything the button's caption or the slide already says is not said again."
-      },
-      {
-        "name": "The One Line, One Row Rule",
-        "body": "Every sung line sits on a single row so singers see where a line ends. Wrapping is a last resort: only when the one-row fit would fall below 40px (26px on stages under 640px wide) do long lines wrap, at line-height 1.1 with a 0.5em gap between sung lines. The start page's example never wraps."
-      },
-      {
-        "name": "The Largest That Fits Rule",
-        "body": "Lyric size is never a fixed step on a scale; it is the largest size at which the whole bhajan fits between the title rule and the meaning. Only outliers that overflow even at 18px with wrapping scroll, inside the stage, fading out at the bottom edge."
-      },
-      {
-        "name": "The Slide Weights Rule",
-        "body": "On the slide the title is 700, the sung words 400, the meaning 400 italic in Soft Charcoal. The lyrics are never bold."
-      },
-      {
-        "name": "The Button Keeps The Middle Rule",
-        "body": "On the start page's first screen the listen button sits near the middle, under the statement; nothing above it may push it below the fold."
-      },
-      {
-        "name": "The Nothing Else Rule",
-        "body": "Once listening starts, and in the found state, the screen shows only the button (and its rings), the slide (title, rule, words, meaning, rule) and the corner circles. No header bar, no list, no progress bar. The start page is the only place with a bar, sections or explanation."
-      },
-      {
-        "name": "The Slide Order Rule",
-        "body": "Title and pitch, rule, lyrics, meaning, rule: always in that order, always inside the slide's margins. The lyrics take whatever height the title and meaning leave."
-      },
-      {
-        "name": "The No Boxes Rule",
-        "body": "The start page has no cards, boxes or tinted bands; the preview screen is the one framed object, because it depicts a screen."
-      },
-      {
-        "name": "The Lifted Few Rule",
-        "body": "Only the listen button, the glass sheets and the preview screen cast shadows. The slide, every rule, pills and corner circles are flat."
-      },
-      {
-        "name": "The Outline Ring Rule",
-        "body": "Listening rings and the download ring are 2px outlines only, never filled."
-      },
-      {
-        "name": "The One Button Rule",
-        "body": "There is one listen button, and it travels: page slot, centre, dock, and back. It is never duplicated: the start page has no second listen control."
-      },
-      {
-        "name": "The Words First Rule",
-        "body": "When a bhajan is found, the button leaves the middle at once (no delay: a waiting button read as lag) while the title rises and the first lyric line follows at 260ms. The room's eye goes to the words, not to the control."
-      },
-      {
-        "name": "The No Snap Rule",
-        "body": "Nothing on the button starts or stops mid-motion. The rings run at one steady rhythm inside a layer that fades in and out; hearing changes their colour and strength, never their timing; the bars start from rest and ease back to it. A snapping button reads as jitter."
-      },
-      {
-        "name": "The Still While Singing Rule",
-        "body": "Motion happens only at the change from one bhajan to the next. Once the meaning has arrived, nothing on screen moves."
-      }
+      "**The Sai Palette Rule.** Cream, navy ink, brand blue, saffron and ray orange; nothing else. No gradients, no glows, no tinted bands.",
+      "**The One Solid Rule.** The round listen button is the only solid saffron object. Everything else is type, a rule, a hairline, a 7% shade, cream glass or the photo.",
+      "**The Saffron Is Not Text Rule.** Saffron and ray orange draw the button, rules, rings and the photo frame. Words are navy or brand blue.",
+      "**The Emblem Rule.** The emblem is the Sri Sathya Sai Global Council, U.S.A. general emblem (`src/assets/emblem.png`, from the user's 2000px transparent PNG). Never the 100th or 99th birthday logos, never recoloured, cropped or placed on a busy background, and never captioned with its own name or values. At least 44px tall.",
+      "**The Page Voice Rule.** Start-page statements are 700 with tight tracking (-0.025em to -0.03em) and balanced wrapping. The slide never borrows that tracking: its title is -0.01em and its lyrics -0.005em.",
+      "**The Say It Once Rule.** The start page says what the app does once, in as few words as possible (the headline and one sentence, by the user's request), and then shows it (the example slide). No step-by-step explainer, no feature blurbs, no repeated call to action; anything the button's caption or the slide already says is not said again.",
+      "**The One Line, One Row Rule.** Every sung line sits on a single row so singers see where a line ends. Wrapping is a last resort: only when the one-row fit would fall below 40px (26px on stages under 640px wide) do long lines wrap, at line-height 1.1 with a 0.5em gap between sung lines. The start page's example never wraps.",
+      "**The Largest That Fits Rule.** Lyric size is never a fixed step on a scale; it is the largest size at which the whole bhajan fits between the title rule and the meaning. Only outliers that overflow even at 18px with wrapping scroll, inside the stage, fading out at the bottom edge.",
+      "**The Slide Weights Rule.** On the slide the title is 700, the sung words 400, the meaning 400 italic in Soft Navy. The lyrics are never bold.",
+      "**The Button Keeps The Middle Rule.** On the start page's first screen the listen button sits near the middle, under the statement; nothing above it may push it below the fold.",
+      "**The Nothing Else Rule.** Once listening starts, and in the found state, the screen shows only the button (and its rings), the slide (title, rule, words, meaning, rule) and the corner circles. No header bar, no list, no progress bar. The start page is the only place with a bar, sections or explanation.",
+      "**The Slide Order Rule.** Title and pitch, rule, lyrics, meaning, rule: always in that order, always inside the slide's margins. The lyrics take whatever height the title and meaning leave.",
+      "**The No Boxes Rule.** The start page has no cards, boxes or tinted bands. Two objects are framed: Swami's photo, in its arch as on an altar, and the preview screen, because it depicts a screen.",
+      "**The Lifted Few Rule.** Only the listen button, Swami's photo, the glass sheets and the preview screen cast shadows. The slide, every rule, pills and corner circles are flat.",
+      "**The Outline Ring Rule.** Listening rings, the download ring and the progress ring are 2px outlines only, never filled; only the progress ring's beads are solid.",
+      "**The Honest Progress Rule.** The progress ring follows the session's real clock and checks. It never fills on a guess, never closes without an answer, and never names a candidate before one is shown.",
+      "**The One Button Rule.** There is one listen button, and it travels: page slot, centre, dock, and back. It is never duplicated: the start page has no second listen control.",
+      "**The Words First Rule.** When a bhajan is found, the button leaves the middle at once (no delay: a waiting button read as lag) while the title rises and the first lyric line follows at 260ms. The room's eye goes to the words, not to the control.",
+      "**The No Snap Rule.** Nothing on the button starts or stops mid-motion. The rings run at one steady rhythm inside a layer that fades in and out; hearing changes their strength, never their timing; the bars start from rest and ease back to it. A snapping button reads as jitter.",
+      "**The Still While Singing Rule.** Motion happens only at the change from one bhajan to the next. Once the meaning has arrived, nothing on screen moves."
     ],
     "dos": [
-      "**Do** keep every surface, start page included, Slide Cream (`#fdf8e8`) with Charcoal (`#333333`) type and Rule Grey (`#9e9e9e`) rules, and keep the system light only.",
+      "**Do** keep every surface Slide Cream (`#fdf8e8`), with Navy Ink (`#0e2a4d`) type, Brand Blue (`#0c5098`) titles and Saffron (`#ee7900`) rules, and keep the system light only.",
+      "**Do** use the Sri Sathya Sai Global Council, U.S.A. general emblem, at 44px or more, in the top bar and footer.",
+      "**Do** open the start page with one of Swami's photos (`src/assets/swami/`) in the arched, ray-orange frame.",
       "**Do** lay out every found bhajan as the slide: bold centred title with \"(ladies / gents)\" pitch over a 2px rule, left-aligned lyrics, italic meaning over a closing 2px rule.",
       "**Do** set lyrics at 400, at the largest size that fits between the rules, one sung line per row, wrapping only below the 40px / 26px floor.",
       "**Do** keep the slide inside its side margins (clamp(20px, 5.5vw, 120px)) and above the dock band, so the docked button never sits on the words.",
-      "**Do** keep the listen button near the middle of the start page's first screen, under one statement.",
+      "**Do** keep the listen button on the start page's first screen, under the photo and one statement.",
       "**Do** write start-page headings at 700 with tight tracking (-0.025em to -0.03em).",
-      "**Do** say each thing on the start page once, and show the slide rather than describe it.",
-      "**Do** make every secondary control a translucent charcoal Shade circle or pill, deepening to Shade Deeper on hover.",
-      "**Do** use a 2px Charcoal outline, 4px out, as the focus ring on every control.",
+      "**Do** keep start-page copy minimal: say what is happening, once, in plain words.",
+      "**Do** make every secondary control a translucent blue Shade circle or pill, deepening to Shade Deeper on hover.",
+      "**Do** use a 2px Brand Blue outline, 4px out, as the focus ring on every control.",
       "**Do** use Glide for movement and Arrive for appearance; let the lyrics arrive before the docked button moves, and the meaning after the last line.",
       "**Do** keep listening rings inside the space between the button and its caption; they must be invisible by the time they reach the text.",
       "**Do** swap every large movement for a crossfade under reduced motion."
     ],
     "donts": [
-      "**Don't** add a dark theme, a white or tinted ground, or any accent hue; the Sai Samathee blue, saffron and ray orange, the blue glow and the saffron warmth are retired.",
-      "**Don't** colour any word: titles and lyrics are Charcoal, ledes and the meaning Soft Charcoal.",
+      "**Don't** use the 100th or 99th birthday logos, or recolour, crop or caption the emblem.",
+      "**Don't** add a dark theme, a white ground, gradients, glows or tinted bands.",
+      "**Don't** set any text in Saffron or Ray Orange; they are for the button, rules, rings and the photo frame.",
       "**Don't** bold or centre the lyrics; weight and centring belong to the title.",
-      "**Don't** use Rule Grey or Hairline for text, or set any text below Quiet Charcoal.",
+      "**Don't** use Hairline for text, or set any text below Quiet Navy.",
       "**Don't** add vertical rules, boxes, cards or header bars around the slide; its two horizontal rules are its only lines.",
-      "**Don't** put cards, tinted bands or boxed panels on the start page; groups are divided by rules alone.",
-      "**Don't** use solid charcoal for anything but the round listen button.",
+      "**Don't** put cards, tinted bands or boxed panels on the start page.",
+      "**Don't** use solid saffron for anything but the round listen button.",
       "**Don't** add explainer steps, feature blurbs or a second call to listen to the start page.",
-      "**Don't** show the start page's bar, sections or explanations once listening starts.",
+      "**Don't** show the start page's bar, photo, sections or explanations once listening starts.",
       "**Don't** fill the listening rings or the download ring.",
       "**Don't** add overshoot to movement; the glide is a critically damped curve and arrivals ease out exponentially.",
       "**Don't** animate anything while the bhajan is being sung.",
       "**Don't** shrink lyrics to a fixed small size to fit a long bhajan before trying one-row fitting, then wrapping.",
-      "**Don't** put logos, ornament, texture, illustration or invented imagery on the page; the only picture is a real bhajan set by the slide itself."
+      "**Don't** use photos with text overlays, signatures or heavy edits, or invent imagery; only the user's supplied photos of Swami."
     ]
   }
 }
