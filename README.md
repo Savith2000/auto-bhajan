@@ -104,7 +104,7 @@ are added. The API allows 60 requests a minute, so a full refresh takes about
 | `src/match/search.ts` | typed search: phonetic folding of romanised text, plus a Devanagari sound match |
 | `src/match/english.ts` | English lyrics → Devanagari by sound (used by `scripts/english-devanagari.ts`) |
 | `src/asr/` | the model worker (from voice-seva) and CTC decoding |
-| `src/audio/`, `public/worklets/` | mic capture at 16 kHz (from voice-seva) |
+| `src/audio/` | mic capture at 16 kHz (from voice-seva); the worklet ships inside the bundle |
 | `saitunes/` | Python API client and CLI (`python3 -m saitunes --help`) |
 
 **Search:** the magnifier in the bottom-right corner (or `/`, or ⌘K) opens a

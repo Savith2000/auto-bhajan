@@ -1,6 +1,16 @@
 // Microphone capture, resampled to the 16 kHz the speech model requires. From voice-seva.
 
-const WORKLET_URL = "/worklets/capture-processor.js";
+import workletSource from "./capture-processor.js?raw";
+
+// The worklet travels inside the app bundle and is loaded from a blob URL, not
+// fetched from the server. A URL like /worklets/capture-processor.js went back
+// to the network on every listen, so a dropped Wi-Fi in the hall meant the mic
+// could not start even though the model was already on the device.
+let workletUrl: string | null = null;
+function workletModule(): string {
+  workletUrl ??= URL.createObjectURL(new Blob([workletSource], { type: "text/javascript" }));
+  return workletUrl;
+}
 
 /** wav2vec2 was trained on 16 kHz audio. It is not a preference. */
 export const TARGET_SAMPLE_RATE = 16_000;
@@ -143,7 +153,7 @@ export class MicCapture {
       });
 
       try {
-        await ctx.audioWorklet.addModule(WORKLET_URL);
+        await ctx.audioWorklet.addModule(workletModule());
 
         const source = ctx.createMediaStreamSource(stream);
         const node = new AudioWorkletNode(ctx, "capture-processor", {

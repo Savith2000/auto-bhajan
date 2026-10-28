@@ -1,6 +1,7 @@
 // Audio thread. Runs in the AudioWorkletGlobalScope — no DOM, no imports,
-// no bundler. It is fetched raw from /worklets/capture-processor.js, which is
-// why it lives in `public/` and is plain JS rather than TypeScript.
+// no bundler. capture.ts bundles this file as text and loads it from a blob
+// URL, so it is plain JS rather than TypeScript, and starting the mic never
+// needs the network.
 //
 // Its only job is to be boring and never block: downmix to mono, batch into
 // frames, hand them to the main thread. Anything expensive here produces
