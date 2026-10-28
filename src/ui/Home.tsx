@@ -1,8 +1,8 @@
-// The start page: what AutoBhajan does, said once, around the button that
+// The start page: what Bhajan Cue does, said once, around the button that
 // does it.
 //
-// The first screen is Swami's photo, framed as on a centre's altar, a
-// headline, one sentence and the listen button (App places the real button in
+// The first screen is Swami's photo, framed as on a centre's altar, his
+// words on why the words matter, one sentence and the listen button (App places the real button in
 // the `slot` here). Scrolling brings in a real bhajan, set exactly as it will
 // be on the projector. Then the keys, and the source.
 
@@ -48,7 +48,7 @@ export function Home({ catalog, visible, fullscreen, scroller, slot, onSearch, o
       <header className={`topbar${scrolled ? " is-scrolled" : ""}`}>
         <span className="wordmark">
           <img className="emblem" src={emblem} alt="Sri Sathya Sai Global Council, U.S.A." width={44} height={44} />
-          AutoBhajan
+          Bhajan Cue
         </span>
         <div className="topbar-actions">
           <button type="button" className="search-pill" onClick={onSearch} disabled={!catalog} aria-keyshortcuts="/">
@@ -73,10 +73,13 @@ export function Home({ catalog, visible, fullscreen, scroller, slot, onSearch, o
         <figure className="altar">
           <img src={photo} alt="Bhagawan Sri Sathya Sai Baba" width={480} height={600} />
         </figure>
-        <h1 id="hero-title">
-          Sing a bhajan. <span className="hero-accent">See the words.</span>
+        {/* Swami's words (Sai Bhajana Mala, 29), quoted exactly. */}
+        <h1 id="hero-title" className="hero-quote">
+          “Any devotional song, in any language can be sung{" "}
+          <span className="hero-accent">as long as all can follow.”</span>
         </h1>
-        <p className="hero-lede">It listens to the first line, then shows the lyrics and meaning.</p>
+        <p className="hero-credit">Sri Sathya Sai Baba</p>
+        <p className="hero-lede">Bhajan Cue hears the first line and puts up the words and meaning for everyone.</p>
         <div className="hero-slot" ref={slot} />
       </section>
 

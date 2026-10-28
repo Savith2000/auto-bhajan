@@ -1,6 +1,6 @@
 // One screen, three states, Apple-style.
 //
-//   idle       the start page: what AutoBhajan does, around the listen button
+//   idle       the start page: what Bhajan Cue does, around the listen button
 //   listening  the page clears; rings ripple out of the button, Shazam-style
 //   found      the button glides to the bottom, the lyrics rise into the middle
 //

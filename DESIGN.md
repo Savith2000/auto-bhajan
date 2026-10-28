@@ -1,5 +1,5 @@
 ---
-name: AutoBhajan
+name: Bhajan Cue
 description: The Sai centre's look. Swami's photo and one saffron button on a cream page under the Sri Sathya Sai Global Council emblem; the bhajan arrives as the slide the centre already projects, navy words, a brand-blue title and saffron rules, readable from the back of the hall.
 colors:
   ink: "#0e2a4d"
@@ -206,15 +206,15 @@ components:
     backgroundColor: "{colors.fill-hover}"
 ---
 
-# Design System: AutoBhajan
+# Design System: Bhajan Cue
 
 ## Overview
 
 **Creative North Star: "The Centre's Slide, in the Centre's Colours"**
 
-AutoBhajan puts up the slide the Sai centre already projects, from a reference slide the user shared: a warm cream page, the bhajan's name and pitch bold and centred over a rule, the romanised lyrics left-aligned below in regular weight, and the English meaning in italics over a closing rule. The room already knows how to read this layout. Since October 2026, by the user's request, the app wears the Sai organisation's own colours rather than the slide's greys: the cream ground stays, the type is a navy ink drawn from the brand blue, titles are brand blue, and saffron (the colour of Swami's robe and of the emblem's centre) carries the listen button, the slide's rules and the listening rings. The Sri Sathya Sai Global Council, U.S.A. emblem (the general emblem, never the 100th birthday one) sits in the top bar and closes the start page, and a photo of Swami, framed in an arch as on a centre's altar, opens it. Around that the app keeps Apple-style restraint: one round button, Shazam-style rings, lines that rise out of a blur, and motion that glides and never bounces.
+Bhajan Cue puts up the slide the Sai centre already projects, from a reference slide the user shared: a warm cream page, the bhajan's name and pitch bold and centred over a rule, the romanised lyrics left-aligned below in regular weight, and the English meaning in italics over a closing rule. The room already knows how to read this layout. Since October 2026, by the user's request, the app wears the Sai organisation's own colours rather than the slide's greys: the cream ground stays, the type is a navy ink drawn from the brand blue, titles are brand blue, and saffron (the colour of Swami's robe and of the emblem's centre) carries the listen button, the slide's rules and the listening rings. The Sri Sathya Sai Global Council, U.S.A. emblem (the general emblem, never the 100th birthday one) sits in the top bar and closes the start page, and a photo of Swami, framed in an arch as on a centre's altar, opens it. Around that the app keeps Apple-style restraint: one round button, Shazam-style rings, lines that rise out of a blur, and motion that glides and never bounces.
 
-There are two densities. The start page says what the app does in as few words as possible and then shows it: a sticky bar with the emblem, wordmark and search; Swami's photo; the headline "Sing a bhajan. See the words." and one sentence; and the listen button with its caption. On scroll, a real bhajan set in a screen under "What the hall sees", a single line of keyboard shortcuts, the emblem and the source. The moment listening starts, the page clears and the screen holds only what the room needs this second: the button and its rings, then the slide with the button docked small beneath it. Everything the volunteer might need beyond that (home, search, other matches, what was heard, full screen) sits in quiet shaded circles in the bottom-right corner. The slide's scale is set for a projector read from the back of a hall by an audience that skews older.
+There are two densities. The start page says what the app does in as few words as possible and then shows it: a sticky bar with the emblem, wordmark and search; Swami's photo; his words as the headline, "Any devotional song, in any language can be sung as long as all can follow." (Sai Bhajana Mala, 29, chosen by the user), credited "— Sri Sathya Sai Baba", and one sentence saying what the app does; and the listen button with its caption. On scroll, a real bhajan set in a screen under "What the hall sees", a single line of keyboard shortcuts, the emblem and the source. The moment listening starts, the page clears and the screen holds only what the room needs this second: the button and its rings, then the slide with the button docked small beneath it. Everything the volunteer might need beyond that (home, search, other matches, what was heard, full screen) sits in quiet shaded circles in the bottom-right corner. The slide's scale is set for a projector read from the back of a hall by an audience that skews older.
 
 The system is light only (`color-scheme: light`, theme colour cream). Navy ink on cream holds about 13.6:1 and the blue title 7.6:1, so the words stay strong on a washed-out projector.
 
@@ -236,7 +236,7 @@ The Sai organisation's palette on the slide's cream. The brand values come from 
 ### Primary
 - **Saffron** (`saffron`, `#ee7900`): the slide's two 2px rules, the listening progress segments, and the download ring's arc. At about 2.7:1 on cream it is a line and object colour, never a text colour.
 - **Deep Saffron** (`saffron-deep`, `#e06f00`): the face of the listen button, one step deeper than the brand orange so its cream glyph holds 3.3:1. Hover presses it to **Saffron Press** (`#d26800`).
-- **Brand Blue** (`blue`, `#0c5098`): the slide title, the second half of the start page's headline ("See the words."), and the focus ring. About 7.6:1 on cream.
+- **Brand Blue** (`blue`, `#0c5098`): the slide title, the end of Swami's saying in the start page's headline ("as long as all can follow."), and the focus ring. About 7.6:1 on cream.
 
 ### Secondary
 - **Ray Orange** (`ray`, `#fbba74`): the 2px line around Swami's photo and the listening rings before singing is heard. Decorative only; about 1.6:1.
@@ -269,7 +269,7 @@ The Sai organisation's palette on the slide's cream. The brand values come from 
 **Character:** One family doing every job, as Apple's interfaces do. The start page speaks like an Apple product page: big, heavy, tightly tracked statements over soft-navy ledes. The slide is set the way the centres set theirs: a bold centred heading, plain regular lyrics, an italic gloss. Hierarchy comes from weight, size, position and the rules; colour marks only the title (brand blue).
 
 ### Hierarchy
-- **Page Display** (700, clamp(36px, min(6vw, 8.2vh), 84px), line-height 1.04, -0.03em, Navy Ink, balanced): the start page's one h1, "Sing a bhajan. See the words.", the second sentence in Brand Blue. clamp(34px, min(5.2vw, 7vh), 76px); the height term keeps it from pushing the button below the fold under the photo.
+- **Page Display** (700, clamp(27px, min(3.7vw, 5.4vh), 52px), line-height 1.12, -0.025em, Navy Ink, balanced, at most 21em wide): the start page's one h1, Swami's saying "Any devotional song, in any language can be sung as long as all can follow." in curly quotes, quoted exactly; its last clause in Brand Blue. Sized for a sentence, not a slogan, so it sits in two lines on a laptop and three on a phone, and the button stays on the first screen under the photo. The credit beneath, "— Sri Sathya Sai Baba", is 500, clamp(15px, 1.2vw, 17px), Quiet Navy, clamp(10px, 1.6vh, 16px) below; the lede follows clamp(16px, 2.8vh, 26px) below that: "Bhajan Cue hears the first line and puts up the words and meaning for everyone."
 - **Page Headline** (700, clamp(32px, 4vw, 56px), line-height 1.08, -0.025em, balanced, centred): the example's heading, "What the hall sees".
 - **Page Lede** (400, clamp(18px, 1.55vw, 23px), line-height 1.42, Soft Navy, max 30em, balanced): the one sentence under the h1.
 - **Shortcut** (400, 15px, Soft Navy): the shortcut labels beside their keycaps.

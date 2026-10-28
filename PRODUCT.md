@@ -23,7 +23,7 @@ line; they do not study the screen.
 
 ## Product Purpose
 
-AutoBhajan listens to the first few seconds of a bhajan through the
+Bhajan Cue listens to the first few seconds of a bhajan through the
 microphone, works out which of ~1,000 catalogued bhajans it is, and puts that
 bhajan's title and lyrics on screen. Then it stops listening until the next
 bhajan.
@@ -93,6 +93,9 @@ the bhajan starting, without anyone searching a book, a binder or a phone.
   around Swami's photo (values from the Voice Seva brand spec, sampled from
   the emblem). Apple-style restraint around it: one round button, smooth
   motion, and nothing but the slide on screen once a bhajan is up.
+- **Name:** Bhajan Cue, chosen by the user (October 2026) to replace
+  "AutoBhajan", which they found corny: the words come up on cue, by
+  themselves. The repository and deployment keep the old `auto-bhajan` name.
 - **Logo:** the Sri Sathya Sai Global Council, U.S.A. general emblem, in the
   top bar and footer. Not the 100th or 99th birthday logos (the user's
   instruction).

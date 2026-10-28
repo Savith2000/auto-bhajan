@@ -1,4 +1,4 @@
-# autobhajan
+# Bhajan Cue
 
 Press **Start listening**, sing the opening of a bhajan, and the page shows its
 title and lyrics. Then it stops listening.
