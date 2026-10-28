@@ -376,11 +376,11 @@
       "**The Slide Order Rule.** Title and pitch, rule, lyrics, meaning, rule: always in that order, always inside the slide's margins. The lyrics take whatever height the title and meaning leave.",
       "**The No Boxes Rule.** The start page has no cards, boxes or tinted bands. Two objects are framed: Swami's photo, in its arch as on an altar, and the preview screen, because it depicts a screen.",
       "**The Lifted Few Rule.** Only the listen button, Swami's photo, the glass sheets and the preview screen cast shadows. The slide, every rule, pills and corner circles are flat.",
-      "**The Outline Ring Rule.** Listening rings, the download ring and the progress ring are 2px outlines only, never filled; only the progress ring's beads are solid.",
-      "**The Honest Progress Rule.** The progress ring follows the session's real clock and checks. It never fills on a guess, never closes without an answer, and never names a candidate before one is shown.",
+      "**The Outline Ring Rule.** Listening rings, the download ring and the progress ring are strokes only, never filled discs.",
+      "**The Honest Progress Rule.** The progress ring follows the session's real clock and checks. A segment never completes before its check has run, the ring never closes without an answer, and it never names a candidate before one is shown.",
       "**The One Button Rule.** There is one listen button, and it travels: page slot, centre, dock, and back. It is never duplicated: the start page has no second listen control.",
-      "**The Words First Rule.** When a bhajan is found, the button leaves the middle at once (no delay: a waiting button read as lag) while the title rises and the first lyric line follows at 260ms. The room's eye goes to the words, not to the control.",
-      "**The No Snap Rule.** Nothing on the button starts or stops mid-motion. The rings run at one steady rhythm inside a layer that fades in and out; hearing changes their strength, never their timing; the bars start from rest and ease back to it. A snapping button reads as jitter.",
+      "**The Words First Rule.** When a bhajan is found, the progress ring closes first (0.66s, so the answer reads as the end of the wait, by the user's request); then the button leaves the middle at once while the title rises and the first lyric line follows at 260ms. The room's eye goes to the words, not to the control.",
+      "**The No Snap Rule.** Nothing on the button starts or stops mid-motion. The rings run at one steady rhythm inside a layer that fades in and out; hearing fades them out, never changes their timing; the bars start from rest and ease back to it. A snapping button reads as jitter.",
       "**The Still While Singing Rule.** Motion happens only at the change from one bhajan to the next. Once the meaning has arrived, nothing on screen moves."
     ],
     "dos": [

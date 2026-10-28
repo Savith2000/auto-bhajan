@@ -37,8 +37,6 @@
   /* the start page's content column */
   --page: min(1120px, calc(100% - 2 * var(--margin)));
   --hairline: rgba(14, 42, 77, 0.12);
-  /* an unlit bead on the listening ring */
-  --rule-quiet: rgba(14, 42, 77, 0.3);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue",
     "Segoe UI", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -174,86 +172,46 @@ button {
   transition: stroke-dashoffset 0.6s var(--arrive);
 }
 
-/* Listening progress: from the first sung word, an arc toward the moment the
-   app must answer, with a bead per check that lights once the check has run.
-   It follows the session's clock (ListenProgress sets the arc each frame), so
-   the arc has no transition while it runs; an answer closes it quickly, a
-   false start drains it. */
+/* Listening progress: five segments, one per stretch of the decision (the
+   checks at 3, 5, 7, 9 s and the answer at 10 s), on a pale saffron track.
+   ListenProgress draws the fills each frame from the session's clock and
+   checks, so nothing here transitions them; this sets colour, weight and the
+   fades in and out. */
 .listen-progress {
   opacity: 0;
   transition: opacity 0.5s var(--arrive);
 }
 
-.listen-progress.is-running {
+.listen-progress.is-running,
+.listen-progress.is-closing {
   opacity: 1;
 }
 
 /* Closed on an answer, it fades as the button docks. */
 .listen-progress.is-done {
   opacity: 0;
-  transition: opacity 0.45s var(--arrive) 0.4s;
+  transition: opacity 0.45s var(--arrive) 0.1s;
 }
 
+/* About 4px on the 132px button. */
 .listen-progress circle {
   fill: none;
-  stroke-width: 1.5;
+  stroke-width: 2.4;
+  stroke-linecap: round;
 }
 
 .listen-progress-track {
-  stroke: var(--hairline);
+  stroke: rgba(238, 121, 0, 0.16);
 }
 
-.listen-progress-arc {
+.listen-progress-fill {
   stroke: var(--saffron);
-  stroke-linecap: round;
-  transition:
-    stroke-dashoffset 0.6s var(--arrive),
-    stroke 0.4s var(--arrive);
-}
-
-.listen-progress.is-running .listen-progress-arc {
   transition: stroke 0.4s var(--arrive);
 }
 
-.listen-progress.is-done .listen-progress-arc {
-  transition: stroke-dashoffset 0.35s var(--arrive);
-}
-
-/* On the second lap the first stays drawn, quieter, under it. */
+/* On the second round the first stays drawn, quieter, under it. */
 .listen-progress.is-twin .lap-0 {
   stroke: var(--ray);
-}
-
-.listen-progress-beads {
-  opacity: 0;
-  transition: opacity 0.4s var(--arrive);
-}
-
-.listen-progress-beads.is-current {
-  opacity: 1;
-}
-
-.listen-progress .listen-progress-bead {
-  fill: var(--ground);
-  stroke: var(--rule-quiet);
-  stroke-width: 1;
-  transform-box: fill-box;
-  transform-origin: center;
-  transition:
-    fill 0.3s var(--arrive),
-    stroke 0.3s var(--arrive);
-}
-
-.listen-progress .listen-progress-bead.is-lit {
-  fill: var(--saffron);
-  stroke: var(--saffron);
-  animation: bead 0.5s var(--arrive);
-}
-
-@keyframes bead {
-  from {
-    transform: scale(1.9);
-  }
 }
 
 .listen {
@@ -345,10 +303,11 @@ button {
   animation-play-state: running;
 }
 
-/* Once singing is heard the progress ring takes over: the ripples quieten
-   (same rhythm, never restarted) and the bars move. */
+/* Once singing is heard the progress ring takes over: the ripples fade out
+   (same rhythm, never restarted; ripples mean waiting, the ring means
+   working) and the bars move. */
 .listen.is-hearing .rings {
-  opacity: 0.4;
+  opacity: 0;
 }
 
 .listen.is-hearing .listen-face path {
@@ -1209,8 +1168,7 @@ kbd {
   }
 
   .ring,
-  .listen.is-hearing .listen-face path,
-  .listen-progress .listen-progress-bead.is-lit {
+  .listen.is-hearing .listen-face path {
     animation: none;
   }
 

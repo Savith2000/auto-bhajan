@@ -21,7 +21,7 @@ import { buildReferences, type Bhajan, type Reference } from "./match/catalog.ts
 import { RULES, type Ranking } from "./match/identify.ts";
 import { buildSearchIndex } from "./match/search.ts";
 import { Home } from "./ui/Home.tsx";
-import { ListenProgress } from "./ui/ListenProgress.tsx";
+import { CLOSE_MS, ListenProgress } from "./ui/ListenProgress.tsx";
 import { CollapseIcon, ExpandIcon, HomeIcon, MoreIcon, SearchIcon, WaveIcon } from "./ui/icons.tsx";
 import { distinguishingLine, Lyrics } from "./ui/Lyrics.tsx";
 import { Search } from "./ui/Search.tsx";
@@ -31,9 +31,17 @@ type Phase =
   /**
    * since: when the first sung words began (performance.now ms), null while
    * waiting for them. twin: listening on past 10 s because two bhajans open
-   * the same way. checked: the checkpoints whose checks have run.
+   * the same way. checked: the checkpoints whose checks have run. closing:
+   * found, and the progress ring is closing before the slide comes up.
    */
-  | { kind: "listening"; singing: boolean; twin: boolean; since: number | null; checked: number[] }
+  | {
+      kind: "listening";
+      singing: boolean;
+      twin: boolean;
+      since: number | null;
+      checked: number[];
+      closing: boolean;
+    }
   /** ranking is null when the bhajan was chosen by search rather than heard. */
   | { kind: "identified"; index: number; ranking: Ranking | null }
   | { kind: "gave-up"; ranking: Ranking | null; heardSinging: boolean }
@@ -65,6 +73,8 @@ export function App() {
   const [fullscreen, setFullscreen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const session = useRef<ListenSession | null>(null);
+  // Set while the progress ring closes on a found bhajan, before it is shown.
+  const closeTimer = useRef<number | null>(null);
   const homeScroller = useRef<HTMLDivElement>(null);
   const [slotEl, setSlotEl] = useState<HTMLDivElement | null>(null);
   // Where the button is: in the start page's slot, gliding out of or back into
@@ -189,7 +199,7 @@ export function App() {
       setLeaving(true);
       window.setTimeout(() => setShown(null), LEAVE_MS);
     }
-    setPhase({ kind: "listening", singing: false, twin: false, since: null, checked: [] });
+    setPhase({ kind: "listening", singing: false, twin: false, since: null, checked: [], closing: false });
     const s = new ListenSession(asr, refs, (u) => {
       if (u.kind === "hearing") {
         // The words are found a little after they begin; date them from their start.
@@ -208,7 +218,14 @@ export function App() {
             : p,
         );
       }
-      else if (u.kind === "identified") show(u.index, u.ranking);
+      else if (u.kind === "identified") {
+        // Let the ring close first, so the answer reads as the end of the wait.
+        setPhase((p) => (p.kind === "listening" ? { ...p, closing: true } : p));
+        closeTimer.current = window.setTimeout(() => {
+          closeTimer.current = null;
+          show(u.index, u.ranking);
+        }, CLOSE_MS);
+      }
       else if (u.kind === "gave-up") setPhase({ kind: "gave-up", ranking: u.ranking, heardSinging: u.heardSinging });
       else if (u.kind === "error") setPhase({ kind: "error", message: u.message });
     });
@@ -216,13 +233,21 @@ export function App() {
     void s.start();
   }, [ready, listening, refs, shown, show]);
 
+  const clearClose = () => {
+    if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+  };
+
   const cancel = useCallback(() => {
+    // Found and closing: nothing to stop, and the answer is a moment away.
+    if (closeTimer.current !== null) return;
     void session.current?.stop();
     setPhase({ kind: "idle" });
   }, []);
 
   // Back to the start page from a shown bhajan or a failed attempt.
   const goHome = useCallback(() => {
+    clearClose();
     void session.current?.stop();
     setPanelOpen(false);
     setChecks([]);
@@ -237,6 +262,7 @@ export function App() {
   // listening in progress.
   const choose = useCallback(
     (index: number) => {
+      clearClose();
       void session.current?.stop();
       setChecks([]);
       setPanelOpen(false);
@@ -305,6 +331,7 @@ export function App() {
             since={listeningPhase?.since ?? null}
             twin={listeningPhase?.twin ?? false}
             checked={listeningPhase?.checked ?? []}
+            closing={listeningPhase?.closing ?? false}
             found={docked}
           />
         )}
@@ -479,6 +506,7 @@ function caption(
     case "idle":
       return "Tap when a bhajan begins";
     case "listening":
+      if (phase.closing) return "Found it.";
       return phase.singing ? "Finding the bhajan…" : "Listening for a bhajan…";
     case "identified":
       return "";
@@ -492,7 +520,7 @@ function caption(
 function captionHint(phase: Phase, ready: boolean, modelError: string | null): string {
   if (modelError || phase.kind === "error") return "";
   if (!ready) return "The first visit downloads the speech model.";
-  if (phase.kind !== "listening") return "";
+  if (phase.kind !== "listening" || phase.closing) return "";
   if (phase.twin) return "Two bhajans start this way. Waiting for the next line.";
   if (!phase.singing) return "Waiting for the first line.";
   // Follows the checks drawn on the ring: before the first, after it, near the end.
