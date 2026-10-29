@@ -4,25 +4,39 @@
 //   listening  the page clears; rings ripple out of the button, Shazam-style
 //   found      the button glides to the bottom, the lyrics rise into the middle
 //
+// With "next bhajan automatically" on (the default), the app keeps listening
+// once a bhajan is up, and when the next one starts it swaps the slide by
+// itself: the old one leaves, the new one arrives, and for a while a quiet
+// "Back to" undoes it. The progress ring belongs to the first answer only.
+//
 // The button is one object throughout. On the start page it sits in the page
 // like any content; when listening starts it glides from there to the middle,
 // and later docks under the slide.
 //
-// Everything else (search, other matches, what was heard, fullscreen) is for
-// the volunteer, and sits quietly in the bottom-right corner.
+// Everything else (home, search, other matches, what was heard, auto next,
+// full screen) is for the volunteer, and sits quietly along the bottom corners.
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 
 import type { AsrProgress, AsrReady } from "./asr/asr.worker.ts";
 import { AsrClient } from "./listen/asr-client.ts";
-import { ListenSession, type SessionUpdate } from "./listen/session.ts";
+import { ListenSession, type SessionOptions, type SessionUpdate } from "./listen/session.ts";
 import { buildReferences, type Bhajan, type Reference } from "./match/catalog.ts";
 import { RULES, type Ranking } from "./match/identify.ts";
 import { buildSearchIndex } from "./match/search.ts";
 import { Home } from "./ui/Home.tsx";
 import { CLOSE_MS, ListenProgress } from "./ui/ListenProgress.tsx";
-import { CollapseIcon, ExpandIcon, HomeIcon, MoreIcon, SearchIcon, WaveIcon } from "./ui/icons.tsx";
+import {
+  AutoIcon,
+  BackIcon,
+  CollapseIcon,
+  ExpandIcon,
+  HomeIcon,
+  MoreIcon,
+  SearchIcon,
+  WaveIcon,
+} from "./ui/icons.tsx";
 import { distinguishingLine, Lyrics } from "./ui/Lyrics.tsx";
 import { Search } from "./ui/Search.tsx";
 
@@ -53,6 +67,23 @@ type Check = Extract<SessionUpdate, { kind: "check" }>;
 const LEAVE_MS = 380;
 /** How long the button takes to glide (matches the dock's transition). */
 const GLIDE_MS = 950;
+/** How long "Back to" stays up after a switch (matches its fade in styles.css). */
+const BACK_MS = 20_000;
+/** A session can run for hours; "What it heard" keeps only the latest checks. */
+const MAX_CHECKS = 12;
+/** Where the "next bhajan automatically" setting is kept between visits. */
+const AUTO_KEY = "bhajan-cue:auto";
+
+const MIC_LOST = "Mic stopped. Tap to restart.";
+const STOPPED = "Stopped. Tap to listen again.";
+
+function savedAuto(): boolean {
+  try {
+    return localStorage.getItem(AUTO_KEY) !== "off";
+  } catch {
+    return true;
+  }
+}
 
 // One worker for the life of the page, created at import so the model starts
 // downloading before React has even rendered.
@@ -73,8 +104,23 @@ export function App() {
   const [fullscreen, setFullscreen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const session = useRef<ListenSession | null>(null);
+  // Whether a session holds the mic, for the wake lock.
+  const [running, setRunning] = useState(false);
+  const [auto, setAuto] = useState(savedAuto);
+  // The bhajan a running session is following, and whether it has heard the
+  // bhajan end and is listening for the next one's opening (armed).
+  const [following, setFollowing] = useState<{ index: number; armed: boolean } | null>(null);
+  // What was on screen before an automatic switch, while "Back to" is offered.
+  const [back, setBack] = useState<{ index: number; ranking: Ranking | null } | null>(null);
+  // Set when listening stopped by itself with a bhajan on screen (mic lost).
+  const [halted, setHalted] = useState<string | null>(null);
   // Set while the progress ring closes on a found bhajan, before it is shown.
   const closeTimer = useRef<number | null>(null);
+  // Set while the old lyrics leave, before the next bhajan (or nothing) is shown.
+  const leaveTimer = useRef<number | null>(null);
+  // The checks since the session last started on a next bhajan: the ones that
+  // found it, if it switches.
+  const attempt = useRef<Check[]>([]);
   const homeScroller = useRef<HTMLDivElement>(null);
   const [slotEl, setSlotEl] = useState<HTMLDivElement | null>(null);
   // Where the button is: in the start page's slot, gliding out of or back into
@@ -180,9 +226,18 @@ export function App() {
     }
   }, [place]);
 
+  const clearTimers = useCallback(() => {
+    if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
+    if (leaveTimer.current !== null) window.clearTimeout(leaveTimer.current);
+    closeTimer.current = null;
+    leaveTimer.current = null;
+  }, []);
+
   const show = useCallback(
     (index: number, ranking: Ranking | null) => {
       if (!catalog) return;
+      if (leaveTimer.current !== null) window.clearTimeout(leaveTimer.current);
+      leaveTimer.current = null;
       setShown(catalog[index]);
       setLeaving(false);
       setPhase({ kind: "identified", index, ranking });
@@ -190,87 +245,244 @@ export function App() {
     [catalog],
   );
 
+  // The bhajan on screen leaves; then the next one comes up (or nothing does).
+  const leave = useCallback((then: () => void) => {
+    setLeaving(true);
+    if (leaveTimer.current !== null) window.clearTimeout(leaveTimer.current);
+    leaveTimer.current = window.setTimeout(() => {
+      leaveTimer.current = null;
+      then();
+    }, LEAVE_MS);
+  }, []);
+
+  const stopSession = useCallback(() => {
+    const s = session.current;
+    session.current = null;
+    void s?.stop();
+    setRunning(false);
+    setFollowing(null);
+  }, []);
+
+  // Updates go through a ref, so a session that runs for hours acts on the
+  // state as it is now, not as it was when the session started.
+  const onUpdate = useRef<(sessionAuto: boolean, u: SessionUpdate) => void>(() => {});
+  const autoNow = useRef(auto);
+  autoNow.current = auto;
+
+  const startSession = useCallback(
+    (options: SessionOptions) => {
+      stopSession();
+      setHalted(null);
+      attempt.current = [];
+      const sessionAuto = !!options.auto || options.following !== undefined;
+      const s = new ListenSession(
+        asr,
+        refs,
+        (u) => {
+          // A session that has been replaced may still have an update in flight.
+          if (session.current === s) onUpdate.current(sessionAuto, u);
+        },
+        options,
+      );
+      session.current = s;
+      setRunning(true);
+      void s.start();
+    },
+    [refs, stopSession],
+  );
+
+  // The session heard the next bhajan begin: the old slide leaves and the new
+  // one comes up, with the way back on offer for a while.
+  const switchTo = (index: number, ranking: Ranking) => {
+    if (phase.kind !== "identified") return show(index, ranking);
+    // What it heard is now about the new bhajan: the checks that found it.
+    setChecks(attempt.current);
+    attempt.current = [];
+    setPanelOpen(false);
+    if (phase.index !== index) setBack({ index: phase.index, ranking: phase.ranking });
+    leave(() => show(index, ranking));
+  };
+
+  onUpdate.current = (sessionAuto, u) => {
+    if (u.kind === "hearing") {
+      // The words are found a little after they begin; date them from their start.
+      const since = performance.now() - u.seconds * 1000;
+      setPhase((p) => (p.kind === "listening" && !p.singing ? { ...p, singing: true, since } : p));
+    } else if (u.kind === "waiting") {
+      // Back to waiting after a false start.
+      setPhase((p) =>
+        p.kind === "listening" && p.singing ? { ...p, singing: false, twin: false, since: null, checked: [] } : p,
+      );
+    } else if (u.kind === "check") {
+      attempt.current = [...attempt.current, u].slice(-MAX_CHECKS);
+      setChecks((c) => [...c, u].slice(-MAX_CHECKS));
+      setPhase((p) =>
+        p.kind === "listening"
+          ? { ...p, checked: [...p.checked, u.at], twin: p.twin || u.twin !== null }
+          : p,
+      );
+    } else if (u.kind === "following") {
+      // The bhajan has ended and it is listening for the next: a fresh attempt.
+      if (u.armed && !following?.armed) attempt.current = [];
+      setFollowing({ index: u.index, armed: u.armed });
+    } else if (u.kind === "identified" && u.switched) {
+      switchTo(u.index, u.ranking);
+    } else if (u.kind === "identified") {
+      // Without auto the session has already let go of the mic.
+      if (!sessionAuto) stopSession();
+      // Let the ring close first, so the answer reads as the end of the wait.
+      setPhase((p) => (p.kind === "listening" ? { ...p, closing: true } : p));
+      closeTimer.current = window.setTimeout(() => {
+        closeTimer.current = null;
+        show(u.index, u.ranking);
+        // The setting may have been changed while it listened.
+        if (sessionAuto && !autoNow.current) stopSession();
+        else if (!sessionAuto && autoNow.current) startSession({ auto: true, following: u.index });
+      }, CLOSE_MS);
+    } else if (u.kind === "gave-up") {
+      stopSession();
+      // Only a first attempt gives up; a bhajan on screen stays.
+      setPhase((p) => (p.kind === "identified" ? p : { kind: "gave-up", ranking: u.ranking, heardSinging: u.heardSinging }));
+    } else if (u.kind === "error" || u.kind === "mic-lost") {
+      stopSession();
+      // With a bhajan up (or about to be), keep it there and say so under the button.
+      if (phase.kind === "identified" || closeTimer.current !== null) {
+        setHalted(u.kind === "mic-lost" ? MIC_LOST : STOPPED);
+      } else {
+        // mic-lost's message is the technical reason ("track ended"); say it plainly.
+        setPhase({ kind: "error", message: u.kind === "mic-lost" ? MIC_LOST : u.message });
+      }
+    }
+  };
+
   const listen = useCallback(() => {
     if (!ready || listening) return;
+    clearTimers();
     setPanelOpen(false);
     setChecks([]);
+    setBack(null);
     // The old bhajan leaves while the button glides back to the middle.
-    if (shown) {
-      setLeaving(true);
-      window.setTimeout(() => setShown(null), LEAVE_MS);
-    }
+    if (shown) leave(() => setShown(null));
     setPhase({ kind: "listening", singing: false, twin: false, since: null, checked: [], closing: false });
-    const s = new ListenSession(asr, refs, (u) => {
-      if (u.kind === "hearing") {
-        // The words are found a little after they begin; date them from their start.
-        const since = performance.now() - u.seconds * 1000;
-        setPhase((p) => (p.kind === "listening" && !p.singing ? { ...p, singing: true, since } : p));
-      } else if (u.kind === "waiting") {
-        // Back to waiting after a false start.
-        setPhase((p) =>
-          p.kind === "listening" && p.singing ? { ...p, singing: false, twin: false, since: null, checked: [] } : p,
-        );
-      } else if (u.kind === "check") {
-        setChecks((c) => [...c, u]);
-        setPhase((p) =>
-          p.kind === "listening"
-            ? { ...p, checked: [...p.checked, u.at], twin: p.twin || u.twin !== null }
-            : p,
-        );
-      }
-      else if (u.kind === "identified") {
-        // Let the ring close first, so the answer reads as the end of the wait.
-        setPhase((p) => (p.kind === "listening" ? { ...p, closing: true } : p));
-        closeTimer.current = window.setTimeout(() => {
-          closeTimer.current = null;
-          show(u.index, u.ranking);
-        }, CLOSE_MS);
-      }
-      else if (u.kind === "gave-up") setPhase({ kind: "gave-up", ranking: u.ranking, heardSinging: u.heardSinging });
-      else if (u.kind === "error") setPhase({ kind: "error", message: u.message });
-    });
-    session.current = s;
-    void s.start();
-  }, [ready, listening, refs, shown, show]);
-
-  const clearClose = () => {
-    if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
-    closeTimer.current = null;
-  };
+    // Stops any session still following the bhajan on screen, and starts afresh.
+    startSession({ auto });
+  }, [ready, listening, shown, auto, clearTimers, leave, startSession]);
 
   const cancel = useCallback(() => {
     // Found and closing: nothing to stop, and the answer is a moment away.
     if (closeTimer.current !== null) return;
-    void session.current?.stop();
+    stopSession();
     setPhase({ kind: "idle" });
-  }, []);
+  }, [stopSession]);
 
   // Back to the start page from a shown bhajan or a failed attempt.
   const goHome = useCallback(() => {
-    clearClose();
-    void session.current?.stop();
+    clearTimers();
+    stopSession();
     setPanelOpen(false);
     setChecks([]);
-    if (shown) {
-      setLeaving(true);
-      window.setTimeout(() => setShown(null), LEAVE_MS);
-    }
+    setBack(null);
+    setHalted(null);
+    if (shown) leave(() => setShown(null));
     setPhase({ kind: "idle" });
-  }, [shown]);
+  }, [shown, clearTimers, stopSession, leave]);
+
+  // The volunteer put a bhajan up by hand. With auto on, carry on from it:
+  // follow it in the running session, or start one that follows it.
+  const keepFollowing = useCallback(
+    (index: number) => {
+      if (!auto) stopSession();
+      else if (session.current && following) session.current.follow(index);
+      else startSession({ auto: true, following: index });
+    },
+    [auto, following, stopSession, startSession],
+  );
 
   // A bhajan chosen by search replaces whatever is on screen, and stops any
   // listening in progress.
   const choose = useCallback(
     (index: number) => {
-      clearClose();
-      void session.current?.stop();
+      clearTimers();
       setChecks([]);
       setPanelOpen(false);
       setSearchOpen(false);
+      setBack(null);
       show(index, null);
+      keepFollowing(index);
     },
-    [show],
+    [clearTimers, show, keepFollowing],
   );
+
+  // One of the other matches, from the panel or after giving up.
+  const pick = useCallback(
+    (index: number, ranking: Ranking | null) => {
+      clearTimers();
+      setPanelOpen(false);
+      setBack(null);
+      show(index, ranking);
+      keepFollowing(index);
+    },
+    [clearTimers, show, keepFollowing],
+  );
+
+  // Undo an automatic switch.
+  const goBack = useCallback(() => {
+    if (!back) return;
+    setBack(null);
+    setChecks([]);
+    setPanelOpen(false);
+    keepFollowing(back.index);
+    leave(() => show(back.index, back.ranking));
+  }, [back, keepFollowing, leave, show]);
+
+  const toggleAuto = useCallback(() => {
+    const on = !auto;
+    setAuto(on);
+    try {
+      localStorage.setItem(AUTO_KEY, on ? "on" : "off");
+    } catch {
+      // Private browsing may refuse storage; the setting holds for this visit.
+    }
+    if (!on) {
+      setHalted(null);
+      if (following) stopSession();
+    } else if (phase.kind === "identified" && !session.current) {
+      startSession({ auto: true, following: phase.index });
+    }
+  }, [auto, following, phase, stopSession, startSession]);
+
+  // "Back to" offers itself for a while, then goes.
+  useEffect(() => {
+    if (!back) return;
+    const timer = window.setTimeout(() => setBack(null), BACK_MS);
+    return () => window.clearTimeout(timer);
+  }, [back]);
+
+  // Keep the screen on while listening: a session can follow bhajans for an
+  // hour with nobody touching the device. The browser drops the lock when the
+  // page is hidden, so ask again when it comes back.
+  useEffect(() => {
+    if (!running || !("wakeLock" in navigator)) return;
+    let lock: WakeLockSentinel | null = null;
+    let done = false;
+    const request = () => {
+      if (document.visibilityState !== "visible") return;
+      navigator.wakeLock.request("screen").then(
+        (l) => {
+          if (done) void l.release().catch(() => {});
+          else lock = l;
+        },
+        () => {},
+      );
+    };
+    request();
+    document.addEventListener("visibilitychange", request);
+    return () => {
+      done = true;
+      document.removeEventListener("visibilitychange", request);
+      void lock?.release().catch(() => {});
+    };
+  }, [running]);
 
   const toggleFullscreen = useCallback(() => {
     if (document.fullscreenElement) void document.exitFullscreen();
@@ -303,7 +515,7 @@ export function App() {
     ranking && catalog
       ? ranking.candidates.filter((c) => phase.kind !== "identified" || c.index !== phase.index).slice(0, 3)
       : [];
-  const text = caption(phase, ready, model, modelError, progress);
+  const text = caption(phase, ready, model, modelError, progress, halted);
   const hint = captionHint(phase, ready, modelError);
   const listeningPhase = phase.kind === "listening" ? phase : null;
   // Download progress, drawn around the button while the speech model loads.
@@ -338,7 +550,7 @@ export function App() {
         <button
           ref={listenButton}
           type="button"
-          className={`listen${listening ? " is-listening" : ""}${hearing ? " is-hearing" : ""}`}
+          className={`listen${listening ? " is-listening" : ""}${hearing ? " is-hearing" : ""}${docked && following?.armed ? " is-armed" : ""}`}
           onClick={listening ? cancel : listen}
           disabled={!ready}
           aria-label={listening ? "Stop listening" : docked ? "Listen for the next bhajan" : "Listen for a bhajan"}
@@ -360,7 +572,7 @@ export function App() {
         {phase.kind === "gave-up" && others.length > 0 && (
           <div className="choices">
             {others.map((c) => (
-              <button key={c.index} type="button" className="choice" onClick={() => show(c.index, ranking!)}>
+              <button key={c.index} type="button" className="choice" onClick={() => pick(c.index, ranking)}>
                 <BhajanName catalog={catalog!} index={c.index} among={others.map((o) => o.index)} />
               </button>
             ))}
@@ -397,52 +609,106 @@ export function App() {
       {/* Under the docked button, once it has settled: what pressing it does now.
           The button itself carries the accessible name; this is for the eye. */}
       {docked && (
-        <span className="next-label" aria-hidden="true" onClick={listen}>
-          Tap for the next bhajan
+        <span
+          className={`next-label${back ? " has-back" : ""}${following && !halted ? " is-live" : ""}`}
+          aria-hidden="true"
+          onClick={listen}
+        >
+          {halted ?? (following ? "Listening for the next bhajan" : "Tap for the next bhajan")}
         </span>
       )}
 
+      {/* After an automatic switch, for a while: undo it. */}
+      {docked && back && catalog && (
+        <button
+          key={back.index}
+          type="button"
+          className="back"
+          aria-label={`Back to ${catalog[back.index].title}`}
+          onClick={goBack}
+        >
+          <BackIcon />
+          <span className="back-text">
+            Back<span className="back-to"> to {catalog[back.index].title}</span>
+          </span>
+        </button>
+      )}
+
+      {/* Each control is named under its circle: a volunteer under pressure
+          should not have to guess what a glyph means. Getting about (home,
+          search) sits bottom-left and the controls for the bhajan on screen
+          bottom-right, so the docked button and its label fit between them.
+          Below 640px they share one row on the right, and only the auto
+          control keeps its name, since its state is the one to read. */}
       <div className={`corner${atHome ? " is-hidden" : ""}`}>
-        {!atHome && !listening && (
-          <button type="button" className="corner-button" aria-label="Back to the start page" onClick={goHome}>
-            <HomeIcon />
-          </button>
-        )}
-        {searchIndex && (
+        <div className="corner-group">
+          {!atHome && !listening && (
+            <button type="button" className="corner-button" aria-label="Home" onClick={goHome}>
+              <span className="corner-circle">
+                <HomeIcon />
+              </span>
+              <span className="corner-caption">Home</span>
+            </button>
+          )}
+          {searchIndex && (
+            <button
+              type="button"
+              className="corner-button"
+              aria-label="Search"
+              aria-keyshortcuts="/"
+              onClick={() => {
+                setPanelOpen(false);
+                setSearchOpen(true);
+              }}
+            >
+              <span className="corner-circle">
+                <SearchIcon />
+              </span>
+              <span className="corner-caption">Search</span>
+            </button>
+          )}
+        </div>
+        <div className="corner-group">
+          {docked && (
+            <button
+              type="button"
+              className="corner-button"
+              aria-label="Wrong bhajan? Other matches"
+              aria-expanded={panelOpen}
+              onClick={() => setPanelOpen((o) => !o)}
+            >
+              <span className="corner-circle">
+                <MoreIcon />
+              </span>
+              <span className="corner-caption">Wrong bhajan?</span>
+            </button>
+          )}
           <button
             type="button"
-            className="corner-button"
-            aria-label="Search bhajans"
-            aria-keyshortcuts="/"
-            onClick={() => {
-              setPanelOpen(false);
-              setSearchOpen(true);
-            }}
+            className={`corner-button corner-auto${auto ? " is-on" : ""}`}
+            aria-label="Auto next: move to the next bhajan by itself"
+            aria-pressed={auto}
+            onClick={toggleAuto}
           >
-            <SearchIcon />
+            <span className="corner-circle">
+              <AutoIcon />
+            </span>
+            <span className="corner-caption">
+              Auto<span className="corner-caption-long"> next</span>: {auto ? "on" : "off"}
+            </span>
           </button>
-        )}
-        {docked && (
-          <button
-            type="button"
-            className="corner-button"
-            aria-label="Other matches and details"
-            aria-expanded={panelOpen}
-            onClick={() => setPanelOpen((o) => !o)}
-          >
-            <MoreIcon />
-          </button>
-        )}
-        {document.fullscreenEnabled && (
-          <button
-            type="button"
-            className="corner-button"
-            aria-label={fullscreen ? "Exit full screen" : "Full screen"}
-            onClick={toggleFullscreen}
-          >
-            {fullscreen ? <CollapseIcon /> : <ExpandIcon />}
-          </button>
-        )}
+          {document.fullscreenEnabled && (
+            <button
+              type="button"
+              className="corner-button corner-fullscreen"
+              aria-label={fullscreen ? "Exit full screen" : "Full screen"}
+              onClick={toggleFullscreen}
+            >
+              <span className="corner-circle">{fullscreen ? <CollapseIcon /> : <ExpandIcon />}</span>
+              <span className="corner-caption">{fullscreen ? "Exit full screen" : "Full screen"}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {panelOpen && docked && catalog && (
@@ -454,10 +720,7 @@ export function App() {
                 key={c.index}
                 type="button"
                 className="panel-row"
-                onClick={() => {
-                  show(c.index, ranking!);
-                  setPanelOpen(false);
-                }}
+                onClick={() => pick(c.index, ranking)}
               >
                 <BhajanName
                   catalog={catalog}
@@ -472,8 +735,9 @@ export function App() {
           {checks.length > 0 && (
             <details className="panel-details">
               <summary>What it heard</summary>
-              {checks.map((c) => (
-                <p key={c.at} className="panel-note">
+              {/* A session can check many times; the same moment can recur. */}
+              {checks.map((c, i) => (
+                <p key={i} className="panel-note">
                   <span className="panel-at">{c.at}s</span> <span lang="sa">{c.transcript || "nothing"}</span>
                 </p>
               ))}
@@ -495,6 +759,7 @@ function caption(
   model: AsrReady | null,
   modelError: string | null,
   progress: AsrProgress | null,
+  halted: string | null,
 ): string {
   if (modelError) return "The speech model couldn't load. Reload the page to try again.";
   if (phase.kind === "error") return phase.message;
@@ -509,7 +774,8 @@ function caption(
       if (phase.closing) return "Found it.";
       return phase.singing ? "Finding the bhajan…" : "Listening for a bhajan…";
     case "identified":
-      return "";
+      // Hidden under the docked button, but still announced.
+      return halted ?? "";
     case "gave-up":
       if (!phase.heardSinging) return "Didn't hear any singing. Tap to try again.";
       return phase.ranking?.candidates.length ? "Is it one of these?" : "Couldn't make out the words. Tap to try again.";

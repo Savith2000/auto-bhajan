@@ -25,8 +25,8 @@ line; they do not study the screen.
 
 Bhajan Cue listens to the first few seconds of a bhajan through the
 microphone, works out which of ~1,000 catalogued bhajans it is, and puts that
-bhajan's title and lyrics on screen. Then it stops listening until the next
-bhajan.
+bhajan's title and lyrics on screen. Then it keeps listening, and when the
+next bhajan starts it puts that one up by itself (this can be turned off).
 
 Success is that the room has the right words in front of it within seconds of
 the bhajan starting, without anyone searching a book, a binder or a phone.
@@ -44,7 +44,8 @@ the bhajan starting, without anyone searching a book, a binder or a phone.
 ## Operating Context
 
 - A bhajan session is a sequence: a bhajan is sung, ends, the next begins. The
-  app's cycle follows it exactly: press, listen, show, wait for the next press.
+  app's cycle follows it exactly: press once, then listen, show, and listen for
+  the next.
 - Bhajans are call and response: the leader sings a line and the group sings it
   back.
 - Identification takes about 3 to 10 seconds after the first sung word; most
@@ -70,6 +71,14 @@ the bhajan starting, without anyone searching a book, a binder or a phone.
   otherwise it treats what it heard as a false start (music, talking) and
   keeps listening, giving up after 45 seconds. Bhajans that share a first line
   are told apart by waiting for the second. Runners-up stay available.
+- Next bhajan automatically, on by default and remembered on the device: once a
+  bhajan is up the app keeps listening. When the singing stops for a few
+  seconds, or the words stop fitting the bhajan on screen (the next one began
+  with no pause), it looks for the next bhajan. It switches the slide only if
+  the new opening fits clearly better than any line of the bhajan on screen,
+  so a line from the middle never moves it. A missed switch is fine (the
+  volunteer taps); a wrong one is not. "Back to" undoes a switch for 20
+  seconds. The screen is kept awake while it listens.
 - No login, no backend at runtime. First use downloads a ~190 MB speech model.
 - Microphone access needs HTTPS or localhost.
 
@@ -115,8 +124,9 @@ the bhajan starting, without anyone searching a book, a binder or a phone.
    the only thing that matters on screen.
 2. **Readable across a hall.** Anything shown must work from the back of the
    room on a projector, not only on the laptop.
-3. **One press, then hands off.** The volunteer's only job is to press at the
-   start of each bhajan; the cycle must be obvious without explanation.
+3. **One press, then hands off.** The volunteer presses once; after that the app
+   follows the session by itself, and a press is only needed when it misses.
+   The cycle must be obvious without explanation.
 4. **Never pull the room out of the bhajan.** Transitions mark the change from
    one bhajan to the next; they never compete with the singing.
 

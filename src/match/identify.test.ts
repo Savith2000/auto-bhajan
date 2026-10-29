@@ -2,7 +2,17 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { makeReference, matchKey, stripRepeatCues, type Reference } from "./catalog.ts";
-import { alignDistance, isClear, isMatch, rank, sharedOpening, twinOf, type Ranking } from "./identify.ts";
+import {
+  alignDistance,
+  anywhereScore,
+  isClear,
+  isMatch,
+  rank,
+  sameLyrics,
+  sharedOpening,
+  twinOf,
+  type Ranking,
+} from "./identify.ts";
 
 const refs: Reference[] = [
   "प्रेम से बोलो एक बार साईं राम\nबोलो राम साईं राम [ प्रेम से ... ]\nमधुर मनोहर राम",
@@ -46,6 +56,20 @@ test("identical lyrics catalogued twice do not count as ambiguity", () => {
   const ranking = rank(matchKey("प्रेम मुदित मन से कहो राम राम राम"), refs);
   assert.ok([2, 3].includes(ranking.candidates[0].index));
   assert.ok(ranking.margin > 0.2, `margin ${ranking.margin}`);
+});
+
+test("a line from a bhajan's middle fits it anywhere, though not at its opening", () => {
+  // "हर हर हर हर महादेव" is line 2 of bhajan 4.
+  const query = matchKey("हर हर हर हर महादेव");
+  assert.equal(anywhereScore(query, refs[4]), 1);
+  assert.ok(rank(query, [refs[4]]).candidates[0].score < 0.5, "anchored to the opening it fits badly");
+  assert.ok(anywhereScore(query, refs[1]) < 0.5, "and another bhajan fits it nowhere");
+  assert.equal(anywhereScore("", refs[4]), 0);
+});
+
+test("a duplicate entry counts as the same lyrics", () => {
+  assert.equal(sameLyrics(refs[2].text, refs[3].text), true);
+  assert.equal(sameLyrics(refs[0].text, refs[2].text), false);
 });
 
 test("word-final viramas the model adds do not cost anything", () => {

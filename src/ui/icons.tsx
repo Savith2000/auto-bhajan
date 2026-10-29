@@ -76,3 +76,21 @@ export function HomeIcon({ size = 20 }: IconProps) {
     </svg>
   );
 }
+
+/** Two chevrons: carry on to the next bhajan without being asked. */
+export function AutoIcon({ size = 20 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M6 7l5 5-5 5" />
+      <path d="M13 7l5 5-5 5" />
+    </svg>
+  );
+}
+
+export function BackIcon({ size = 16 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M14.5 6l-6 6 6 6" />
+    </svg>
+  );
+}

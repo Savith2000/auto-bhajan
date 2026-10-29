@@ -112,6 +112,89 @@ button {
   animation: fade-in 0.6s var(--arrive) 0.8s both;
 }
 
+/* Auto next is listening: a saffron dot before the label, breathing slowly,
+   like a recording light. Small and slow so it never draws the room's eye. */
+.next-label.is-live::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--saffron);
+  vertical-align: 0.1em;
+  animation: live 2.4s ease-in-out infinite;
+}
+
+@keyframes live {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* After an automatic switch, the way back: a quiet pill left of the docked
+   button, on its centre line. It fades in once the new slide is up and out at
+   the end of its 20 s (BACK_MS in App), never popping while people sing. */
+.back {
+  position: absolute;
+  right: calc(50% + var(--button) * 0.23 + 20px);
+  top: calc(100% - var(--dock-gap));
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  /* Clear of the home and search circles at the far left. */
+  max-width: min(20em, calc(50% - var(--button) * 0.23 - 20px - max(var(--margin), 140px)));
+  height: 32px;
+  padding: 0 14px 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--fill);
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  transform: translateY(-50%);
+  animation: back-life 20s linear both;
+  transition:
+    background-color 0.2s var(--arrive),
+    color 0.2s var(--arrive);
+}
+
+.back:hover {
+  background: var(--fill-hover);
+  color: var(--ink);
+}
+
+.back svg {
+  flex: none;
+}
+
+.back-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes back-life {
+  0%,
+  4% {
+    opacity: 0;
+  }
+  8%,
+  96% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 /* On the start page the button is page content, in the hero's slot. */
 .dock.is-inline {
   position: relative;
@@ -308,6 +391,17 @@ button {
    working) and the bars move. */
 .listen.is-hearing .rings {
   opacity: 0;
+}
+
+/* Docked and following: the bhajan has ended and it is listening for the
+   next one's opening. The same ripples, fainter; no progress ring over the
+   slide. Nothing moves while a bhajan is being sung. */
+.listen.is-armed .rings {
+  opacity: 0.5;
+}
+
+.listen.is-armed .ring {
+  animation-play-state: running;
 }
 
 .listen.is-hearing .listen-face path {
@@ -863,14 +957,26 @@ kbd {
 
 /* ---- volunteer corner -------------------------------------------------------- */
 
+/* Two groups along the bottom: getting about on the left, the bhajan on
+   screen's controls on the right, the docked button between them. The row
+   itself lets clicks through to the button and its label. */
 .corner {
   position: absolute;
+  left: 20px;
   right: 20px;
-  bottom: 20px;
+  bottom: 14px;
   display: flex;
-  gap: 10px;
+  justify-content: space-between;
   z-index: 3;
+  pointer-events: none;
   transition: opacity 0.35s var(--arrive);
+}
+
+.corner-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  pointer-events: auto;
 }
 
 /* The start page has its own top bar. */
@@ -879,24 +985,71 @@ kbd {
   visibility: hidden;
 }
 
+/* A circle with its name beneath, like a toolbar showing icon and text. The
+   whole of it is the target. */
 .corner-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.corner-circle {
   width: 40px;
   height: 40px;
-  border: 0;
   border-radius: 50%;
   background: var(--fill);
-  color: var(--ink-2);
   display: grid;
   place-items: center;
-  cursor: pointer;
   transition:
     background-color 0.2s var(--arrive),
     color 0.2s var(--arrive);
 }
 
+.corner-caption {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
 .corner-button:hover {
-  background: var(--fill-hover);
   color: var(--ink);
+}
+
+.corner-button:hover .corner-circle {
+  background: var(--fill-hover);
+}
+
+.corner-button:focus-visible {
+  outline: none;
+}
+
+.corner-button:focus-visible .corner-circle {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+/* "Auto next", when on: filled in brand blue, so the state reads at a glance
+   from across the desk, and its name says so in words. */
+.corner-auto.is-on .corner-circle {
+  background: var(--blue);
+  color: #fffdf5;
+}
+
+.corner-auto.is-on .corner-caption {
+  color: var(--blue);
+}
+
+.corner-auto.is-on:hover .corner-circle {
+  background: #0a4585;
 }
 
 .panel {
@@ -1114,10 +1267,37 @@ kbd {
     --dock-gap: 64px;
   }
 
-  /* On the docked button's centre line, so the bottom reads as one row. */
+  /* The circles on the docked button's centre line, so the bottom reads as
+     one row; the auto control's name hangs below it. */
   .corner {
+    left: auto;
     right: 14px;
-    bottom: calc(var(--dock-gap) - 20px);
+    bottom: calc(var(--dock-gap) - 38px);
+    gap: 6px;
+  }
+
+  .corner-group {
+    gap: 6px;
+  }
+
+  .corner-circle {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* No room for every name beside the docked button. Home and search are
+     glyphs everyone knows; auto keeps a short name, since its state matters. */
+  .corner-button {
+    min-width: 36px;
+  }
+
+  .corner-caption,
+  .corner-caption-long {
+    display: none;
+  }
+
+  .corner-auto .corner-caption {
+    display: block;
   }
 
   /* No room for the button, its label and the corner controls side by side
@@ -1133,10 +1313,33 @@ kbd {
   .next-label {
     left: calc(var(--margin) + var(--button) * 0.46 + 12px);
     top: calc(100% - var(--dock-gap));
-    max-width: 7em;
+    /* Whatever the corner row (about 180px) leaves. */
+    max-width: calc(100vw - var(--margin) - var(--button) * 0.46 - 12px - 196px);
     transform: translateY(-50%);
     font-size: 14px;
     white-space: normal;
+  }
+
+  /* "Back" takes the label's place beside the button while it is offered;
+     the title is in its accessible name. */
+  .back {
+    right: auto;
+    left: calc(var(--margin) + var(--button) * 0.46 + 12px);
+    max-width: none;
+  }
+
+  .back-to {
+    display: none;
+  }
+
+  .next-label.has-back {
+    visibility: hidden;
+  }
+
+  /* No room for five circles beside the docked button. Full screen stays in
+     the start page's bar (and on F). */
+  .corner-fullscreen {
+    display: none;
   }
 
   .topbar {
@@ -1191,7 +1394,8 @@ kbd {
   }
 
   .ring,
-  .listen.is-hearing .listen-face path {
+  .listen.is-hearing .listen-face path,
+  .next-label.is-live::before {
     animation: none;
   }
 

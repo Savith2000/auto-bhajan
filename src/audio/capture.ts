@@ -55,7 +55,24 @@ export type CaptureOptions = {
    * "the microphone is broken" rather than "that one is gone".
    */
   deviceId?: string;
+
+  /**
+   * Called once if capture stops on its own (not via stop()): the track ended or stayed muted, the context was
+   * interrupted or closed, or no frames arrived for a while. Phones do this on a call or when the screen locks.
+   */
+  onEnd?: (reason: string) => void;
 };
+
+// A phone call or Siri mutes the track and interrupts the context, and both can
+// come back by themselves a moment later. Short blips are not worth a restart,
+// so a mute or a suspension has to last this long before it counts as the end.
+const SETTLE_MS = 2_000;
+
+// The worklet posts a frame every 64 ms. Three seconds without one means the
+// graph has stopped pulling audio even though nothing announced it — which
+// WebKit does after an interruption (bugs 204681 and 208209).
+const NO_FRAMES_MS = 3_000;
+const WATCHDOG_EVERY_MS = 1_000;
 
 export type AudioInput = { deviceId: string; label: string };
 
@@ -95,6 +112,11 @@ export class MicCapture {
   private readonly source: MediaStreamAudioSourceNode;
   private readonly node: AudioWorkletNode;
   readonly info: CaptureInfo;
+  /** Set by the first stop(), or when capture ends on its own. Makes stop() safe to call twice. */
+  private stopping: Promise<void> | null = null;
+  /** Removes the listeners and timers that watch for the mic going away. */
+  private unwatch: (() => void) | null = null;
+  private lastFrameAt = 0;
 
   // Spelled out rather than using constructor parameter properties. Those are
   // the one TypeScript feature that cannot be erased by deleting types — they
@@ -118,7 +140,7 @@ export class MicCapture {
   static async start(
     onFrame: (frame: CaptureFrame) => void,
     onInfo: (info: CaptureInfo) => void,
-    { processing = false, deviceId }: CaptureOptions = {},
+    { processing = false, deviceId, onEnd }: CaptureOptions = {},
   ): Promise<MicCapture> {
     if (typeof navigator === "undefined" || !navigator.mediaDevices) {
       // Almost always the cause: served over plain http from a LAN address.
@@ -174,6 +196,10 @@ export class MicCapture {
           processingEnabled: processing,
         };
 
+        // Assigned once the graph is running; the watchdog reads when the
+        // last frame came through it.
+        let capture: MicCapture | null = null;
+
         node.port.onmessage = (event: MessageEvent<WorkletMessage>) => {
           const message = event.data;
           if (message.type === "ready") {
@@ -182,6 +208,7 @@ export class MicCapture {
             return;
           }
 
+          if (capture) capture.lastFrameAt = performance.now();
           const { samples } = message;
           let sumSquares = 0;
           let peak = 0;
@@ -216,7 +243,9 @@ export class MicCapture {
         if (ctx.state === "suspended") await ctx.resume();
 
         onInfo({ ...info });
-        return new MicCapture(ctx, stream, source, node, info);
+        capture = new MicCapture(ctx, stream, source, node, info);
+        if (onEnd) capture.watch(onEnd);
+        return capture;
       } catch (error) {
         await ctx.close();
         throw error;
@@ -227,7 +256,94 @@ export class MicCapture {
     }
   }
 
-  async stop(): Promise<void> {
+  stop(): Promise<void> {
+    this.stopping ??= this.release();
+    return this.stopping;
+  }
+
+  /**
+   * Notices the mic going away without anyone calling stop(). Nothing in the
+   * page does that on its own: a call, Siri or a locked screen takes the mic
+   * from under a running session, and the only signs are scattered across the
+   * track, the context and the frames simply stopping. Any one of them, held
+   * long enough, ends the capture once and tells the caller why.
+   */
+  private watch(onEnd: (reason: string) => void): void {
+    const ctx = this.ctx;
+    const track = this.stream.getAudioTracks()[0];
+    let muteTimer: ReturnType<typeof setTimeout> | undefined;
+    let suspendTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const end = (reason: string) => {
+      // stop() has run, or another sign got here first.
+      if (this.stopping) return;
+      // Release the mic before telling the caller, so a restart from inside
+      // onEnd asks for a mic this capture no longer holds. A close that fails
+      // on a dead context has nothing left to clean up.
+      this.stopping = this.release();
+      this.stopping.catch(() => {});
+      onEnd(reason);
+    };
+
+    const onTrackEnded = () => end("track ended");
+    const onMute = () => {
+      clearTimeout(muteTimer);
+      muteTimer = setTimeout(() => end("track muted"), SETTLE_MS);
+    };
+    const onUnmute = () => {
+      clearTimeout(muteTimer);
+      muteTimer = undefined;
+    };
+
+    const onStateChange = () => {
+      // "interrupted" is Safari's and not yet in lib.dom's AudioContextState.
+      const state: string = ctx.state;
+      if (state === "running") {
+        clearTimeout(suspendTimer);
+        suspendTimer = undefined;
+      } else if (state === "interrupted" || state === "closed") {
+        end(`context ${state}`);
+      } else if (state === "suspended" && suspendTimer === undefined) {
+        // Worth one try: the context was running a moment ago, so the page
+        // has already been allowed to play audio.
+        ctx.resume().catch(() => {});
+        suspendTimer = setTimeout(() => end("context suspended"), SETTLE_MS);
+      }
+    };
+
+    let lastTick = performance.now();
+    this.lastFrameAt = lastTick;
+    const watchdog = setInterval(() => {
+      const now = performance.now();
+      // A tick this late means the whole page was frozen — screen locked, tab
+      // put away — so frames could not have arrived either. Start counting
+      // again instead of blaming the mic for the page's nap.
+      if (now - lastTick > 2 * WATCHDOG_EVERY_MS) this.lastFrameAt = now;
+      lastTick = now;
+      if (now - this.lastFrameAt > NO_FRAMES_MS) end("no frames");
+    }, WATCHDOG_EVERY_MS);
+
+    track?.addEventListener("ended", onTrackEnded);
+    track?.addEventListener("mute", onMute);
+    track?.addEventListener("unmute", onUnmute);
+    ctx.addEventListener("statechange", onStateChange);
+    if (track?.muted) onMute();
+
+    this.unwatch = () => {
+      track?.removeEventListener("ended", onTrackEnded);
+      track?.removeEventListener("mute", onMute);
+      track?.removeEventListener("unmute", onUnmute);
+      ctx.removeEventListener("statechange", onStateChange);
+      clearTimeout(muteTimer);
+      clearTimeout(suspendTimer);
+      clearInterval(watchdog);
+    };
+  }
+
+  private async release(): Promise<void> {
+    // First, so closing the context below does not read as the mic going away.
+    this.unwatch?.();
+    this.unwatch = null;
     this.node.port.onmessage = null;
     this.source.disconnect();
     this.node.disconnect();

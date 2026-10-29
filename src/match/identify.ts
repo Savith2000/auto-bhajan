@@ -129,6 +129,20 @@ export function rank(
   };
 }
 
+/**
+ * How well an already-normalised query fits anywhere in one bhajan (0–1), not
+ * only at its opening: voice-seva's free-start search. Following a bhajan on
+ * screen needs both questions. A line from the middle of it can fit the
+ * opening of some other bhajan quite well, but it fits the bhajan it came
+ * from better, and that is what keeps it from being taken for the next one.
+ */
+export function anywhereScore(query: string, ref: Reference): number {
+  const m = query.length;
+  if (m === 0) return 0;
+  const distance = Math.min(alignDistance(query, ref.text, Infinity), alignDistance(query, ref.sung, Infinity));
+  return Math.max(0, 1 - distance / m);
+}
+
 // --- scoring against the model's probabilities ------------------------------
 
 export type EncodedReference = {
@@ -197,7 +211,8 @@ export function rankBySound(
 export const SAME_LYRICS_CER = 0.1;
 const SAME_LYRICS_PREFIX = 100;
 
-function sameLyrics(a: string, b: string): boolean {
+/** Whether two references' texts are one bhajan catalogued twice (see above). */
+export function sameLyrics(a: string, b: string): boolean {
   if (a === b) return true;
   const length = Math.min(a.length, b.length, SAME_LYRICS_PREFIX);
   return cer(a.slice(0, length), b.slice(0, length)) <= SAME_LYRICS_CER;
