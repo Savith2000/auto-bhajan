@@ -4,10 +4,10 @@
 //   listening  the page clears; rings ripple out of the button, Shazam-style
 //   found      the button glides to the bottom, the lyrics rise into the middle
 //
-// With "next bhajan automatically" on (the default), the app keeps listening
-// once a bhajan is up, and when the next one starts it swaps the slide by
-// itself: the old one leaves, the new one arrives, and for a while a quiet
-// "Back to" undoes it. The progress ring belongs to the first answer only.
+// With "next bhajan automatically" on (a Beta, off by default), the app keeps
+// listening once a bhajan is up, and when the next one starts it swaps the
+// slide by itself: the old one leaves, the new one arrives, and for a while a
+// quiet "Back to" undoes it. The progress ring belongs to the first answer only.
 //
 // The button is one object throughout. On the start page it sits in the page
 // like any content; when listening starts it glides from there to the middle,
@@ -28,7 +28,6 @@ import { buildSearchIndex } from "./match/search.ts";
 import { Home } from "./ui/Home.tsx";
 import { CLOSE_MS, ListenProgress } from "./ui/ListenProgress.tsx";
 import {
-  AutoIcon,
   BackIcon,
   CollapseIcon,
   ExpandIcon,
@@ -73,15 +72,20 @@ const BACK_MS = 20_000;
 const MAX_CHECKS = 12;
 /** Where the "next bhajan automatically" setting is kept between visits. */
 const AUTO_KEY = "bhajan-cue:auto";
+/** Set once the auto control has explained itself on this device. */
+const AUTO_INTRO_KEY = "bhajan-cue:auto-intro";
+/** How long that first explanation stays up. */
+const AUTO_INTRO_MS = 9_000;
 
 const MIC_LOST = "Mic stopped. Tap to restart.";
 const STOPPED = "Stopped. Tap to listen again.";
 
 function savedAuto(): boolean {
   try {
-    return localStorage.getItem(AUTO_KEY) !== "off";
+    // Off until the volunteer turns it on: it is still a Beta.
+    return localStorage.getItem(AUTO_KEY) === "on";
   } catch {
-    return true;
+    return false;
   }
 }
 
@@ -107,6 +111,8 @@ export function App() {
   // Whether a session holds the mic, for the wake lock.
   const [running, setRunning] = useState(false);
   const [auto, setAuto] = useState(savedAuto);
+  // The auto control's explanation, opened by itself the first time a bhajan is up.
+  const [autoIntro, setAutoIntro] = useState(false);
   // The bhajan a running session is following, and whether it has heard the
   // bhajan end and is listening for the next one's opening (armed).
   const [following, setFollowing] = useState<{ index: number; armed: boolean } | null>(null);
@@ -437,6 +443,7 @@ export function App() {
 
   const toggleAuto = useCallback(() => {
     const on = !auto;
+    setAutoIntro(false);
     setAuto(on);
     try {
       localStorage.setItem(AUTO_KEY, on ? "on" : "off");
@@ -450,6 +457,21 @@ export function App() {
       startSession({ auto: true, following: phase.index });
     }
   }, [auto, following, phase, stopSession, startSession]);
+
+  // The first time a bhajan is up on this device, the auto control says what it
+  // does, then gets out of the way.
+  useEffect(() => {
+    if (!docked) return;
+    try {
+      if (localStorage.getItem(AUTO_INTRO_KEY)) return;
+      localStorage.setItem(AUTO_INTRO_KEY, "seen");
+    } catch {
+      return;
+    }
+    setAutoIntro(true);
+    const timer = window.setTimeout(() => setAutoIntro(false), AUTO_INTRO_MS);
+    return () => window.clearTimeout(timer);
+  }, [docked]);
 
   // "Back to" offers itself for a while, then goes.
   useEffect(() => {
@@ -683,20 +705,33 @@ export function App() {
               <span className="corner-caption">Wrong bhajan?</span>
             </button>
           )}
-          <button
-            type="button"
-            className={`corner-button corner-auto${auto ? " is-on" : ""}`}
-            aria-label="Auto next: move to the next bhajan by itself"
-            aria-pressed={auto}
-            onClick={toggleAuto}
-          >
-            <span className="corner-circle">
-              <AutoIcon />
-            </span>
-            <span className="corner-caption">
-              Auto<span className="corner-caption-long"> next</span>: {auto ? "on" : "off"}
-            </span>
-          </button>
+          {/* The one setting with a state worth reading from across the desk:
+              a named switch, marked Beta, that explains itself on hover or focus. */}
+          <div className={`auto-control${autoIntro && !panelOpen ? " is-explaining" : ""}`}>
+            <button
+              type="button"
+              role="switch"
+              className={`auto-toggle${auto ? " is-on" : ""}`}
+              aria-checked={auto}
+              aria-describedby="auto-tip"
+              onClick={toggleAuto}
+            >
+              <span className="auto-name">
+                Auto<span className="auto-name-long"> next</span>
+              </span>
+              <span className="beta">Beta</span>
+              <span className="switch" aria-hidden="true">
+                <span className="switch-knob" />
+              </span>
+            </button>
+            <div id="auto-tip" role="tooltip" className="auto-tip">
+              <p className="auto-tip-title">
+                Auto next <span className="beta">Beta</span>
+              </p>
+              <p>When a bhajan ends, Bhajan Cue listens for the next one and puts it up by itself.</p>
+              <p className="auto-tip-note">If it misses one, tap the button.</p>
+            </div>
+          </div>
           {document.fullscreenEnabled && (
             <button
               type="button"

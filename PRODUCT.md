@@ -26,7 +26,7 @@ line; they do not study the screen.
 Bhajan Cue listens to the first few seconds of a bhajan through the
 microphone, works out which of ~1,000 catalogued bhajans it is, and puts that
 bhajan's title and lyrics on screen. Then it keeps listening, and when the
-next bhajan starts it puts that one up by itself (this can be turned off).
+next bhajan starts it puts that one up by itself (a Beta, off until turned on).
 
 Success is that the room has the right words in front of it within seconds of
 the bhajan starting, without anyone searching a book, a binder or a phone.
@@ -71,14 +71,15 @@ the bhajan starting, without anyone searching a book, a binder or a phone.
   otherwise it treats what it heard as a false start (music, talking) and
   keeps listening, giving up after 45 seconds. Bhajans that share a first line
   are told apart by waiting for the second. Runners-up stay available.
-- Next bhajan automatically, on by default and remembered on the device: once a
-  bhajan is up the app keeps listening. When the singing stops for a few
+- Next bhajan automatically, off by default (a Beta) and remembered on the
+  device: once a bhajan is up the app keeps listening. When the singing stops for a few
   seconds, or the words stop fitting the bhajan on screen (the next one began
   with no pause), it looks for the next bhajan. It switches the slide only if
   the new opening fits clearly better than any line of the bhajan on screen,
   so a line from the middle never moves it. A missed switch is fine (the
   volunteer taps); a wrong one is not. "Back to" undoes a switch for 20
-  seconds. The screen is kept awake while it listens.
+  seconds. The screen is kept awake while it listens. It is marked Beta, by the
+  user's request, as a named switch that says what it does.
 - No login, no backend at runtime. First use downloads a ~190 MB speech model.
 - Microphone access needs HTTPS or localhost.
 
