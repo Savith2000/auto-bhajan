@@ -70,8 +70,12 @@ const GLIDE_MS = 950;
 const BACK_MS = 20_000;
 /** A session can run for hours; "What it heard" keeps only the latest checks. */
 const MAX_CHECKS = 12;
-/** Where the "next bhajan automatically" setting is kept between visits. */
-const AUTO_KEY = "bhajan-cue:auto";
+/**
+ * Where the "next bhajan automatically" setting is kept between visits. A new
+ * key since it became a Beta: choices saved while it was on by default
+ * ("bhajan-cue:auto") are left behind, so everyone starts with it off.
+ */
+const AUTO_KEY = "bhajan-cue:auto-beta";
 /** Set once the auto control has explained itself on this device. */
 const AUTO_INTRO_KEY = "bhajan-cue:auto-intro";
 /** How long that first explanation stays up. */
